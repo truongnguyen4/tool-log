@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-de184a1c2b2c5b4f2207.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "tool-log",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "tool-log::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tool-log-Debug-4194daef5c99a343e711.json",
+					"name" : "tool-log",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "tool-log_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tool-log_autogen-Debug-600626bfc4a6df2e6197.json",
+					"name" : "tool-log_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "tool-log_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tool-log_autogen_timestamp_deps-Debug-da8ebaeeb992dc6ec62f.json",
+					"name" : "tool-log_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/ttnguyen4/Downloads/tool-log/tool-log/build/Desktop_Qt_6_9_1_MinGW_64_bit-Debug",
+		"source" : "C:/Users/ttnguyen4/Downloads/tool-log"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}
