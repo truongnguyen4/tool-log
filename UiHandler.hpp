@@ -29,12 +29,12 @@ private:
 public:
     void setTagHighLight(Ui::MainWindow *ui, const QString &tag);
     void setMsgHighLight(Ui::MainWindow *ui, const QString &msg);
-    void loadLogs(Ui::MainWindow *ui, vector<Log> logs);
+    void loadLogs(Ui::MainWindow *ui, QList<Log> logs);
     void updateLogShow(Ui::MainWindow *ui, QTableWidgetItem *item);
     void markLog(Ui::MainWindow *ui, FileLogHelper &fileLogHelper, QTableWidgetItem *item = nullptr);
     void focusLog(Ui::MainWindow *ui, QTableWidgetItem *item);
     void initUi(Ui::MainWindow *ui);
-    void updateLogVisibility(Ui::MainWindow *ui, vector<Log> &logs, bool isAllVisible);
+    void updateLogVisibility(Ui::MainWindow *ui, QList<Log> &logs);
     void clearLogs(Ui::MainWindow *ui);
     void setLineEdit(Ui::MainWindow *ui, QObject *obj, const QString &key);
     void getLineMarks(Ui::MainWindow *ui, FileLogHelper &fileLogHelper);

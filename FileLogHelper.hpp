@@ -15,25 +15,25 @@ private:
     static const QString TAG;
     static const regex logcatPattern;
     static std::atomic_bool isWatchingLog;
-    vector<Log> mListLogs;
+    QList<Log> mListLogs;
     QString mFilePath;
-    QProcess *mProcess = nullptr;
+    QProcess *mProcessLogcat = nullptr;
     void readLog(const QString &filePath);
-    Log convertLog(const string &line);
     void watchLog(const QString &filePath);
-    void stopWatch();
-    void startWatch();
-    bool checkDevice();
+    QString checkDevice();
+    bool checkPath(const string &filePath);
 public:
-    void readLogsFromFile(const QString &filePath);
-    vector<Log>& getListLogs();
+    bool setFilePath(const QString &filePath);
+    Log convertLog(const string &line);
+    QList<Log> readLogsFromFile(const QString &filePath);
+    QList<Log>& getListLogs();
     string getNameFile();
     int getSizeFile();
     bool reverseIsMarkLog(int line);
     Log getLog(int index);
-    bool startWatchLog(const string &filePath);
+    bool startWatchLog(QProcess *& process);
     void clearLogs();
-    QString runShellCommand(const QStringList &command_args, const QString &filePath = "");
+    QString runShellCommand(const QStringList &command_args);
 
 };
 #endif // FILELOGHELPER_H

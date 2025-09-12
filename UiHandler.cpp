@@ -24,7 +24,7 @@ void UiHandler::setMsgHighLight(Ui::MainWindow *ui, const QString &msg)
     ui->table_logs->viewport()->update();
 }
 
-void UiHandler::loadLogs(Ui::MainWindow *ui, vector<Log> logs)
+void UiHandler::loadLogs(Ui::MainWindow *ui, QList<Log> logs)
 {
     ui->table_logs->setRowCount(0);
     ui->table_logs->setUpdatesEnabled(false);
@@ -183,9 +183,9 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     ui->log->setReadOnly(true);
 }
 
-void UiHandler::updateLogVisibility(Ui::MainWindow *ui, vector<Log> &logs, bool isAllVisible)
+void UiHandler::updateLogVisibility(Ui::MainWindow *ui, QList<Log> &logs)
 {
-    if (isAllVisible)
+    if (logs.isEmpty())
     {
         ui->table_logs->setUpdatesEnabled(false);
         for (int row = 0; row < ui->table_logs->rowCount(); ++row)

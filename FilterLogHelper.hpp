@@ -17,7 +17,7 @@ class FilterLogHelper
 private:
     static const QString TAG;
 public:
-    vector<Log> &filterLogs(vector<Log> &logs, int from, int to, string pid, string tag, string msg, string level);
+    QList<Log> &filterLogs(QList<Log> &logs, int from, int to, string pid, string tag, string msg, string level);
 };
 
 #endif // FILTERLOGHELPER_H

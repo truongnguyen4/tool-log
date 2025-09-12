@@ -11,7 +11,7 @@ using std::chrono::steady_clock;
 const QString FilterLogHelper::TAG = "FilterLogHelper";
 
 
-vector<Log> &FilterLogHelper::filterLogs(vector<Log> &logs, int from, int to, string pid, string tag, string msg, string level)
+QList<Log> &FilterLogHelper::filterLogs(QList<Log> &logs, int from, int to, string pid, string tag, string msg, string level)
 {
     Logger::setTimeFrom("Filter", steady_clock::now());
 

@@ -39,24 +39,30 @@ void Logger::e(const QString &tag, const QString &msg)
 
 void Logger::setTimeFrom(const QString &name, steady_clock::time_point timeFrom)
 {
-    timestampMap[name.toStdString()] = make_pair(timeFrom, steady_clock::time_point());
+    if (VERBOSE)
+    {
+        timestampMap[name.toStdString()] = make_pair(timeFrom, steady_clock::time_point());
+    }
 }
 
 void Logger::setTimeTo(const QString &name, steady_clock::time_point timeTo)
 {
-    auto it = timestampMap.find(name.toStdString());
-    if (it != timestampMap.end())
+    if (VERBOSE)
     {
-        it->second.second = timeTo;
-        if (VERBOSE)
+        auto it = timestampMap.find(name.toStdString());
+        if (it != timestampMap.end())
         {
-            auto duration = duration_cast<milliseconds>(it->second.second - it->second.first).count();
-            d("Timer", QString::fromStdString("Time for " + name.toStdString() + ": " + std::to_string(duration) + " ms"));
+            it->second.second = timeTo;
+            if (VERBOSE)
+            {
+                auto duration = duration_cast<milliseconds>(it->second.second - it->second.first).count();
+                d("Timer", QString::fromStdString("Time for " + name.toStdString() + ": " + std::to_string(duration) + " ms"));
+            }
+            timestampMap.erase(it);
         }
-        timestampMap.erase(it);
-    }
-    else
-    {
-        w("Timer", QString::fromStdString("Timestamp for " + name.toStdString() + " not found."));
+        else
+        {
+            w("Timer", QString::fromStdString("Timestamp for " + name.toStdString() + " not found."));
+        }
     }
 }

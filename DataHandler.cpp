@@ -1,6 +1,6 @@
 #include "DataHandler.hpp"
 
-vector<Log> &DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
+QList<Log> &DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
     addKey(pid, tag, msg, level);
     return mFilterLogHelper.filterLogs(mFileLogHelper.getListLogs(), 1, mFileLogHelper.getSizeFile(), pid.toStdString(), tag.toStdString(), msg.toStdString(), level.toStdString());
@@ -11,15 +11,24 @@ FileLogHelper &DataHandler::getFileLogHelper()
     return mFileLogHelper;
 }
 
-vector<Log> DataHandler::refreshLog(const QString &file)
+QList<Log> DataHandler::refreshLog(const QString &filePath)
 {
-    mFileLogHelper.readLogsFromFile(file);
-    return mFileLogHelper.getListLogs();
+    if (mFileLogHelper.setFilePath(filePath))
+    {
+        return mFileLogHelper.readLogsFromFile(filePath);
+    }
+    Logger::e("DataHandler", "Failed to refresh Log, returning empty log list.");
+    return QList<Log>();
 }
 
-bool DataHandler::startWatchLog(QString file)
+bool DataHandler::startWatchLog(QString filePath, QProcess *& process)
 {
-    return mFileLogHelper.startWatchLog(file.toStdString());
+    if (mFileLogHelper.setFilePath(filePath))
+    {
+        return mFileLogHelper.startWatchLog(process);
+    }
+    Logger::e("DataHandler", "Failed to start log watch, returning false.");
+    return false;
 }
 
 void DataHandler::clearLogs()

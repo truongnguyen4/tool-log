@@ -23,10 +23,10 @@ private:
     int mLevelId = 0;
     void addKey(const QString &tag, const QString &msg, const QString &level, const QString &pid);
 public:
-    vector<Log> &onFilterKeyChanged(const QString &tag, const QString &msg, const QString &level, const QString &pid);
+    QList<Log> &onFilterKeyChanged(const QString &tag, const QString &msg, const QString &level, const QString &pid);
     FileLogHelper& getFileLogHelper();
-    vector<Log> refreshLog(const QString &file);
-    bool startWatchLog(QString file);
+    QList<Log> refreshLog(const QString &file);
+    bool startWatchLog(QString filePath, QProcess *& process);
     void clearLogs();
     QString previousKey(Ui::MainWindow *ui, QObject *obj);
     QString nextKey(Ui::MainWindow *ui, QObject *obj);

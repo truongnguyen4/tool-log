@@ -61,15 +61,23 @@ Log FileLogHelper::convertLog(const string &line)
     return log;
 }
 
-void FileLogHelper::readLogsFromFile(const QString &filePath)
+bool FileLogHelper::setFilePath(const QString &filePath)
 {
-    mFilePath = filePath;
-    Logger::setTimeFrom("ReadFile", steady_clock::now());
-    readLog(mFilePath);
-    Logger::setTimeTo("ReadFile", steady_clock::now());
+    if (checkPath(filePath.toStdString()))
+    {
+        mFilePath = filePath;
+        return true;
+    }
+    return false;
 }
 
-vector<Log> &FileLogHelper::getListLogs()
+QList<Log> FileLogHelper::readLogsFromFile(const QString &filePath)
+{
+    readLog(mFilePath);
+    return mListLogs;
+}
+
+QList<Log> &FileLogHelper::getListLogs()
 {
     return mListLogs;
 }
@@ -105,21 +113,58 @@ Log FileLogHelper::getLog(int index)
     return mListLogs[index];
 }
 
-bool FileLogHelper::startWatchLog(const string& filePath)
+bool FileLogHelper::startWatchLog(QProcess *& process)
+{
+    if (checkDevice().isEmpty())
+    {
+        NotificationDialog::show(NotificationDialog::ERROR, "Can't find any devices", TAG);
+        return false;
+    }
+
+    // Check if the file is already being watched, stop the current watch
+    if (process && process->state() == QProcess::Running)
+    {
+        Logger::d(TAG, "Stopping current log watch");
+        // TODO: save output to file before killing
+        process->kill();
+        process->waitForFinished();
+        Logger::d(TAG, "Current log watch stopped");
+        return false;
+    }
+
+    Logger::d(TAG, "Starting log watch");
+
+
+
+    process->setStandardOutputFile(mFilePath, QIODevice::Append);
+    process->start("adb", QStringList() << "logcat");
+
+    return true;
+}
+
+QString FileLogHelper::checkDevice()
+{
+    QString output = runShellCommand(QStringList() << "devices");
+    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
+    if (lines.length() == 2)
+    {
+        if (lines[1].contains("device"))
+        {
+            QString deviceId = lines[1].split('\t')[0];
+            Logger::d(TAG, "Found device: " + deviceId);
+            return deviceId;
+        }
+    }
+    return "";
+}
+
+bool FileLogHelper::checkPath(const string &filePath)
 {
     if (filePath.empty())
     {
         NotificationDialog::show(NotificationDialog::WARNING, "File path is empty, cannot start watching log.", TAG);
         return false;
     }
-
-    // Check if the file is already being watched, stop the current watch
-    if (isWatchingLog)
-    {
-        stopWatch();
-        return false;
-    }
-
     // Validate the file path format
     std::vector<std::string> parts;
     size_t start = 0, end;
@@ -154,114 +199,36 @@ bool FileLogHelper::startWatchLog(const string& filePath)
         Logger::d(TAG, QString::fromStdString("Log file created: " + filePath));
         outfile.close();
     }
-    mFilePath = QString::fromLatin1(filePath);
-    watchLog(mFilePath);
-    return isWatchingLog;
-}
-
-bool FileLogHelper::checkDevice()
-{
-    QString output = runShellCommand(QStringList() << "devices");
-    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
-    if (lines.length() >= 2)
-    {
-        if (lines[1].contains("device"))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void FileLogHelper::stopWatch()
-{
-    Logger::d(TAG, "Stopping watch on log file: " + mFilePath);
-
-    if (mProcess && mProcess->state() == QProcess::Running)
-    {
-        mProcess->kill();
-        mProcess->waitForFinished();
-        if (mProcess)
-        {
-            delete mProcess;
-            mProcess = nullptr;
-            isWatchingLog = false;
-        }
-        Logger::d(TAG, "Log file watch stopped.");
-    }
-}
-
-void FileLogHelper::watchLog(const QString &filePath)
-{
-    Logger::d(TAG, "Watching log file: " + filePath);
-
-    if (!checkDevice())
-    {
-        NotificationDialog::show(NotificationDialog::ERROR, "Can't find any devices", TAG);
-        return;
-    }
-    runShellCommand(QStringList() << "logcat", filePath);
+    return true;
 }
 
 void FileLogHelper::clearLogs()
 {
     mListLogs.clear();
-    if (checkDevice())
+    QProcess *newProcess = new QProcess();
+    newProcess->start("echo", QStringList() << " " << " > " + mFilePath);
+    newProcess->waitForFinished();
+    delete newProcess;
+    newProcess = nullptr;
+
+    if (!checkDevice().isEmpty())
     {
         runShellCommand(QStringList() << "logcat" << "-c");
     }
 }
 
-QString FileLogHelper::runShellCommand(const QStringList &args, const QString &filePath)
+QString FileLogHelper::runShellCommand(const QStringList &args)
 {
-    Logger::d(TAG, QString::fromStdString("Running shell command: adb " + args.join(" ").toStdString() + " with file path: ") + filePath);
+    Logger::d(TAG, QString::fromStdString("Running shell command: adb " + args.join(" ").toStdString()));
 
-    if (mProcess == nullptr)
-    {
-        mProcess = new QProcess();
-    }
-    if (mProcess->state() == QProcess::Running)
-    {
-        stopWatch();
-    }
+    QProcess *process = new QProcess();
+    process->start("adb", args);
+    process->waitForFinished();
 
-    QString output = "";
-    // adb logcat: redirect output to file
-    QFile file(filePath);
-    if (!filePath.isEmpty())
-    {
-        if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-        {
-            mProcess->setStandardOutputFile(filePath);
-            file.close();
-        }
-        else
-        {
-            NotificationDialog::show(NotificationDialog::ERROR, QString::fromStdString("Failed to open log file for writing: ") + filePath, TAG);
-            return output;
-        }
-    }
-    mProcess->start("adb", args);
-    isWatchingLog = true;
+    QString output = process->readAllStandardOutput();
+    delete process;
 
-    // adb logcat: get output from file
-    if (!filePath.isEmpty())
-    {
-        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            output = file.readAll();
-            file.close();
-        }
-    }
-    // adb devices: get output from standard output
-    else {
-        mProcess->waitForFinished();
-        output = mProcess->readAllStandardOutput();
-        delete mProcess;
-        mProcess = nullptr;
-        isWatchingLog = false;
-    }
-
+    Logger::d(TAG, "Finished running shell command");
     return output;
 }
 

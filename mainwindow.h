@@ -30,6 +30,7 @@ private:
     DataHandler mDataHandler;
     SettingDialog mSettingDialog;
     NotificationDialog mNotificationDialog;
+    QProcess *process = nullptr;
 
     bool isHidden = false;
 

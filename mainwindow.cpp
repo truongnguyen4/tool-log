@@ -4,7 +4,8 @@
 #include "Log.hpp"
 #include <QTableWidgetItem>
 #include <QSize>
-
+#include <QProcess>
+#include "Constant.hpp"
 using std::vector;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -26,16 +27,12 @@ void MainWindow::onReloadTable()
     QString msg = ui->msg->text().trimmed();
     QString level = ui->level->text().trimmed();
 
-    bool isAllVisible = pid.isEmpty() &&
-                        tag.isEmpty() &&
-                        msg.isEmpty() &&
-                        level.isEmpty();
-    vector<Log> logs;
-    if (!isAllVisible)
+    QList<Log> logs;
+    if (!pid.isEmpty() || !tag.isEmpty() || !msg.isEmpty() || !level.isEmpty())
     {
         logs = mDataHandler.onFilterKeyChanged(pid, tag, msg, level);
     }
-    mUiHandler.updateLogVisibility(ui, logs, isAllVisible);
+    mUiHandler.updateLogVisibility(ui, logs);
 }
 
 void MainWindow::onShowItem(QTableWidgetItem *item)
@@ -67,26 +64,31 @@ void MainWindow::onSetMsgHighLight()
 
 void MainWindow::onRefreshLog()
 {
+    // UI logic
     mUiHandler.clearTextInput(ui->pid, ui->tag, ui->msg, ui->level);
     ui->table_logmark->setRowCount(0);
 
+    // Data logic
     QString filePath = ui->file->text().trimmed();
-    vector<Log> listLogs = mDataHandler.refreshLog(filePath);
+    QList<Log> listLogs = mDataHandler.refreshLog(filePath);
     mUiHandler.loadLogs(ui, listLogs);
 }
 
 void MainWindow::onStart()
 {
+    // Data logic
     QString filePath = ui->file->text().trimmed();
-    bool isWatching = mDataHandler.startWatchLog(filePath);
+    bool isWatching = mDataHandler.startWatchLog(filePath, process);
+
+    // UI logic
     QString text = isWatching ? "Stop" : "Start";
     ui->start->setText(text);
     ui->clear->setDisabled(isWatching);
     mUiHandler.setDisableTextInput(isWatching /*disable*/, ui->file, ui->pid, ui->tag, ui->msg, ui->level);
-    if (!isWatching)
-    {
-        onRefreshLog();
-    }
+    // if (!isWatching)
+    // {
+    //     onRefreshLog();
+    // }
 }
 
 void MainWindow::onClear()
@@ -168,4 +170,21 @@ void MainWindow::init()
     connect(ui->clear, &QPushButton::pressed, this, &MainWindow::onClear);
     connect(ui->setting, &QPushButton::pressed, this, &MainWindow::onSettings);
     connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
+    
+    process = new QProcess(this);
+    // connect(process, &QProcess::readyReadStandardOutput, [=]() {
+    //     QByteArray output = process->readAllStandardOutput();
+    //     // Log log = mDataHandler.getFileLogHelper().convertLog(output.toStdString());
+    //     Logger::d("MainWindow", QString::fromStdString("New log line: " + output.toStdString()));
+    //     // const int row = ui->table_logs->rowCount();
+    //     // ui->table_logs->insertRow(row);
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_LINE, new QTableWidgetItem(QString::number(log.getLine())));
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_DATE, new QTableWidgetItem(QString::fromStdString(log.getDate())));
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_TIME, new QTableWidgetItem(QString::fromStdString(log.getTime())));
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_PID, new QTableWidgetItem(QString::fromStdString(log.getPid())));
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_TID, new QTableWidgetItem(QString::fromStdString(log.getTid())));
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_LEVEL, new QTableWidgetItem(QString::fromStdString(log.getLevel())));
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_TAG, new QTableWidgetItem(QString::fromStdString(log.getTag())));
+    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_MSG, new QTableWidgetItem(QString::fromStdString(log.getMsg())));
+    // });
 }
