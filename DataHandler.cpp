@@ -1,4 +1,8 @@
 #include "DataHandler.hpp"
+#include "mainwindow.h"
+#include "NotificationManager.hpp"
+
+const QString DataHandler::TAG = "DataHandler";
 
 QList<Log> &DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
@@ -13,27 +17,39 @@ FileLogHelper &DataHandler::getFileLogHelper()
 
 QList<Log> DataHandler::refreshLog(const QString &filePath)
 {
-    if (mFileLogHelper.setFilePath(filePath))
+    if (!mFileLogHelper.checkPath(filePath))
     {
-        return mFileLogHelper.readLogsFromFile(filePath);
+        Logger::d(TAG, "refreshLog");
+        NotificationManager::showError(MainWindow::ERROR_FILE_PATH);
+        return QList<Log>();
     }
-    Logger::e("DataHandler", "Failed to refresh Log, returning empty log list.");
-    return QList<Log>();
+
+    return mFileLogHelper.readLogsFromFile();
 }
 
-bool DataHandler::startWatchLog(QString filePath, QProcess *& process)
+int DataHandler::startWatchLog(QString filePath, const QString deviceId)
 {
-    if (mFileLogHelper.setFilePath(filePath))
+    if (!mFileLogHelper.checkPath(filePath))
     {
-        return mFileLogHelper.startWatchLog(process);
+        return MainWindow::ERROR_FILE_PATH;
     }
-    Logger::e("DataHandler", "Failed to start log watch, returning false.");
-    return false;
+
+    if (!ProcessHandler::checkDeviceId(deviceId))
+    {
+        return MainWindow::ERROR_DEVICE_ID;
+    }
+    
+    return ProcessHandler::startWatchLog(filePath);
 }
 
-void DataHandler::clearLogs()
+int DataHandler::clearLogcat(const QString deviceId)
 {
-    mFileLogHelper.clearLogs();
+    if (!ProcessHandler::checkDeviceId(deviceId))
+    {
+        return MainWindow::ERROR_DEVICE_ID;
+    }
+
+    return ProcessHandler::clearLogcat();
 }
 
 void DataHandler::addKey(const QString &pid, const QString &tag, const QString &msg, const QString &level)
@@ -85,7 +101,7 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
     if (obj == ui->pid)
     {
         mPidId = mPidId - 1 < 0 ? 0 : mPidId - 1;
-        Logger::d("DataHandler", QString::fromStdString("previousKey -> pid = " + std::to_string(mPidId)));
+        Logger::d(TAG, "previousKey -> pid = " + QString::number(mPidId));
         return mListPid.empty() ? "" : mListPid.at(mPidId);
     }
     if (obj == ui->tag)
@@ -111,7 +127,7 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
     if (obj == ui->pid)
     {
         mPidId = mPidId + 1 >= mListPid.size() ? mListPid.size() - 1 : mPidId + 1;
-        Logger::d("DataHandler", QString::fromStdString("nextKey -> pid = " + std::to_string(mPidId)));
+        Logger::d(TAG, "nextKey -> pid = " + QString::number(mPidId));
         return mListPid.at(mPidId);
     }
     if (obj == ui->tag)
@@ -130,4 +146,19 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
         return mListLevel.at(mLevelId);
     }
     return "";
+}
+
+QStringList DataHandler::getDeviceIds()
+{
+    return ProcessHandler::getDeviceIds();
+}
+
+
+int DataHandler::deviceIdChanged(const QString deviceId)
+{
+    if (!ProcessHandler::checkDeviceId(deviceId))
+    {
+        return MainWindow::ERROR_DEVICE_ID;
+    }
+    return MainWindow::SUCCESS;
 }

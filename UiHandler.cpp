@@ -4,7 +4,7 @@
 #include <string>
 #include <QScrollBar>
 #include "Constant.hpp"
-
+#include "mainwindow.h"
 const QString UiHandler::TAG = "UiHandler";
 //============== Public methods ==============
 
@@ -206,7 +206,7 @@ void UiHandler::updateLogVisibility(Ui::MainWindow *ui, QList<Log> &logs)
     Logger::setTimeTo("Set hidden", steady_clock::now());
 }
 
-void UiHandler::clearLogs(Ui::MainWindow *ui)
+void UiHandler::clearLogcat(Ui::MainWindow *ui)
 {
     clearTextInput(ui->pid, ui->tag, ui->msg, ui->level);
     ui->table_logmark->clearContents();
@@ -234,7 +234,7 @@ void UiHandler::setLineEdit(Ui::MainWindow *ui, QObject *obj, const QString &key
     }
 }
 
-void UiHandler::getLineMarks(Ui::MainWindow *ui, FileLogHelper &fileLogHelper)
+void UiHandler::clearMarkLogs(Ui::MainWindow *ui, FileLogHelper &fileLogHelper)
 {
     const int rows = ui->table_logmark->rowCount();
     for (int row = 0; row < rows; row++)
@@ -249,6 +249,23 @@ void UiHandler::getLineMarks(Ui::MainWindow *ui, FileLogHelper &fileLogHelper)
     }
     ui->table_logmark->setRowCount(0);
 }
+
+void UiHandler::refreshDeviceIds(Ui::MainWindow *ui, QStringList deviceIds)
+{
+    ui->devices->setText("(" + QString::number(deviceIds.size()) + ")");
+    ui->device_ids->clear();
+    ui->device_ids->addItems(deviceIds);
+}
+
+void UiHandler::startWatching(Ui::MainWindow *ui, const bool isWatching)
+{
+    QString text = isWatching ? "Stop" : "Start";
+    ui->start->setText(text);
+    ui->clear->setDisabled(isWatching);
+    setDisableTextInput(isWatching /*disable*/, ui->file, ui->pid, ui->tag, ui->msg, ui->level);
+    setDisableComboBox(isWatching /*disable*/, ui->device_ids);
+}
+
 
 //===========================================================
 //============== Private methods ============================

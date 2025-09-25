@@ -35,9 +35,11 @@ public:
     void focusLog(Ui::MainWindow *ui, QTableWidgetItem *item);
     void initUi(Ui::MainWindow *ui);
     void updateLogVisibility(Ui::MainWindow *ui, QList<Log> &logs);
-    void clearLogs(Ui::MainWindow *ui);
+    void clearLogcat(Ui::MainWindow *ui);
     void setLineEdit(Ui::MainWindow *ui, QObject *obj, const QString &key);
-    void getLineMarks(Ui::MainWindow *ui, FileLogHelper &fileLogHelper);
+    void clearMarkLogs(Ui::MainWindow *ui, FileLogHelper &fileLogHelper);
+    void refreshDeviceIds(Ui::MainWindow *ui, QStringList deviceIds);
+    void startWatching(Ui::MainWindow *ui, const bool startWatch);
     template <typename... Args>
     void clearTextInput(Args &&...textBoxes)
     {
@@ -47,6 +49,11 @@ public:
     void setDisableTextInput(bool disable, Args &&...textBoxes)
     {
         (textBoxes->setDisabled(disable), ...);
+    }
+    template <typename... Args>
+    void setDisableComboBox(bool disable, Args &&...comboBoxes)
+    {
+        (comboBoxes->setDisabled(disable), ...);
     }
 };
 

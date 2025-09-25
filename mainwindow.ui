@@ -51,6 +51,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QComboBox" name="device_ids"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="devices">
+            <property name="text">
+             <string>(0)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer">
             <property name="focusPolicy">
              <enum>Qt::FocusPolicy::NoFocus</enum>

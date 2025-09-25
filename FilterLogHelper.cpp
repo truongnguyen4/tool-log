@@ -8,8 +8,8 @@
 using std::string;
 using std::vector;
 using std::chrono::steady_clock;
-const QString FilterLogHelper::TAG = "FilterLogHelper";
 
+const QString FilterLogHelper::TAG = "FilterLogHelper";
 
 QList<Log> &FilterLogHelper::filterLogs(QList<Log> &logs, int from, int to, string pid, string tag, string msg, string level)
 {

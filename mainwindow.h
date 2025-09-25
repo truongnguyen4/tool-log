@@ -23,18 +23,23 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    static constexpr int SUCCESS = 0;
+    static constexpr int ERROR_FILE_PATH = -1;
+    static constexpr int ERROR_DEVICE_ID = -2;
+    static constexpr int ERROR_UNKNOWN = -3;
 
 private:
+    static const QString TAG;
     Ui::MainWindow *ui;
     UiHandler mUiHandler;
     DataHandler mDataHandler;
     SettingDialog mSettingDialog;
     NotificationDialog mNotificationDialog;
-    QProcess *process = nullptr;
 
-    bool isHidden = false;
+    int isWatching = 0;
 
     void init();
+    void onRefreshDeviceIds();
 
     void onReloadTable();
     void onShowItem(QTableWidgetItem *item);
@@ -49,6 +54,7 @@ private:
     void onClearMark();
     void onDownPressed(QObject *obj);
     void onUpPressed(QObject *obj);
+    void onDeviceIdChanged();
     bool eventFilter(QObject *obj, QEvent *event);
 signals:
     void downPressed();

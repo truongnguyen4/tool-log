@@ -4,9 +4,11 @@
 #include "Log.hpp"
 #include <QTableWidgetItem>
 #include <QSize>
-#include <QProcess>
-#include "Constant.hpp"
+#include "NotificationManager.hpp"
+
 using std::vector;
+
+QString const MainWindow::TAG = "MainWindow";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -77,24 +79,31 @@ void MainWindow::onRefreshLog()
 void MainWindow::onStart()
 {
     // Data logic
-    QString filePath = ui->file->text().trimmed();
-    bool isWatching = mDataHandler.startWatchLog(filePath, process);
+    const QString filePath = ui->file->text().trimmed();
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    const int errorCode = mDataHandler.startWatchLog(filePath, deviceId);
+    NotificationManager::showError(errorCode);
+    if (errorCode != MainWindow::SUCCESS)
+    {
+        return;
+    } 
+    isWatching = !isWatching;
+    Logger::d(TAG, (isWatching ? QString("Start") : QString("Stop")) + " watching successfull");
 
     // UI logic
-    QString text = isWatching ? "Stop" : "Start";
-    ui->start->setText(text);
-    ui->clear->setDisabled(isWatching);
-    mUiHandler.setDisableTextInput(isWatching /*disable*/, ui->file, ui->pid, ui->tag, ui->msg, ui->level);
-    // if (!isWatching)
-    // {
-    //     onRefreshLog();
-    // }
+    mUiHandler.startWatching(ui, isWatching);
+    if (!isWatching)
+    {
+        onRefreshLog();
+    }
 }
 
 void MainWindow::onClear()
 {
-    mDataHandler.clearLogs();
-    mUiHandler.clearLogs(ui);
+    mUiHandler.clearLogcat(ui);
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    int errorCode = mDataHandler.clearLogcat(deviceId);
+    NotificationManager::showError(errorCode);
 }
 
 void MainWindow::onSettings()
@@ -105,13 +114,13 @@ void MainWindow::onSettings()
 
 void MainWindow::onClearMark()
 {
-    mUiHandler.getLineMarks(ui, mDataHandler.getFileLogHelper());
+    mUiHandler.clearMarkLogs(ui, mDataHandler.getFileLogHelper());
 }
 
 void MainWindow::onDownPressed(QObject *obj)
 {
     QString key = mDataHandler.nextKey(ui, obj);
-    if (key != "")
+    if (!key.isEmpty())
     {
         mUiHandler.setLineEdit(ui, obj, key);
     }
@@ -120,7 +129,7 @@ void MainWindow::onDownPressed(QObject *obj)
 void MainWindow::onUpPressed(QObject *obj)
 {
     QString key = mDataHandler.previousKey(ui, obj);
-    if (key != "")
+    if (!key.isEmpty())
     {
         mUiHandler.setLineEdit(ui, obj, key);
     }
@@ -130,17 +139,50 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     auto QLineEditClass = qobject_cast<QLineEdit*>(obj);
     if (QLineEditClass && event->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Down) {
-            onDownPressed(obj);
-            return true;
+        QString objName = obj->objectName();
+        if (objName == ui->msg->objectName()
+            || objName == ui->tag->objectName()
+            || objName == ui->pid->objectName()
+            || objName == ui->level->objectName())
+        {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+            if (keyEvent->key() == Qt::Key_Down) {
+                onDownPressed(obj);
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Up) {
+                onUpPressed(obj);
+                return true;
+            }
         }
-        if (keyEvent->key() == Qt::Key_Up) {
-            onUpPressed(obj);
+    }
+
+    auto QLabelClass = qobject_cast<QLabel*>(obj);
+    if (QLabelClass && event->type() == QEvent::MouseButtonPress) {
+        QString objName = obj->objectName();
+        if (objName == ui->devices->objectName())
+        {
+            onRefreshDeviceIds();
             return true;
         }
     }
     return QWidget::eventFilter(obj, event);
+}
+
+void MainWindow::onRefreshDeviceIds()
+{
+    const QStringList deviceIds = mDataHandler.getDeviceIds();
+    mUiHandler.refreshDeviceIds(ui, deviceIds);
+}
+
+void MainWindow::onDeviceIdChanged()
+{
+    const QString deviceId = ui->device_ids->currentText();
+    if (!deviceId.isEmpty())
+    {
+        const int errorCode = mDataHandler.deviceIdChanged(deviceId);
+        NotificationManager::showError(errorCode);
+    }
 }
 
 void MainWindow::init()
@@ -157,6 +199,7 @@ void MainWindow::init()
     ui->tag->installEventFilter(this);
     ui->msg->installEventFilter(this);
     ui->level->installEventFilter(this);
+    ui->devices->installEventFilter(this);
 
     connect(ui->table_logs, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
     connect(ui->table_logs, &QTableWidget::itemDoubleClicked, this, &MainWindow::onMarkItem);
@@ -170,21 +213,8 @@ void MainWindow::init()
     connect(ui->clear, &QPushButton::pressed, this, &MainWindow::onClear);
     connect(ui->setting, &QPushButton::pressed, this, &MainWindow::onSettings);
     connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
-    
-    process = new QProcess(this);
-    // connect(process, &QProcess::readyReadStandardOutput, [=]() {
-    //     QByteArray output = process->readAllStandardOutput();
-    //     // Log log = mDataHandler.getFileLogHelper().convertLog(output.toStdString());
-    //     Logger::d("MainWindow", QString::fromStdString("New log line: " + output.toStdString()));
-    //     // const int row = ui->table_logs->rowCount();
-    //     // ui->table_logs->insertRow(row);
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_LINE, new QTableWidgetItem(QString::number(log.getLine())));
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_DATE, new QTableWidgetItem(QString::fromStdString(log.getDate())));
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_TIME, new QTableWidgetItem(QString::fromStdString(log.getTime())));
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_PID, new QTableWidgetItem(QString::fromStdString(log.getPid())));
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_TID, new QTableWidgetItem(QString::fromStdString(log.getTid())));
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_LEVEL, new QTableWidgetItem(QString::fromStdString(log.getLevel())));
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_TAG, new QTableWidgetItem(QString::fromStdString(log.getTag())));
-    //     // ui->table_logs->setItem(row, Constant::TableLog::COL_MSG, new QTableWidgetItem(QString::fromStdString(log.getMsg())));
-    // });
+
+    connect(ui->device_ids, &QComboBox::currentTextChanged, this, &MainWindow::onDeviceIdChanged);
+
+    onRefreshDeviceIds();
 }

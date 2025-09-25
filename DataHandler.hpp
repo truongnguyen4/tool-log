@@ -5,14 +5,17 @@
 #include "./ui_mainwindow.h"
 #include <QString>
 #include <vector>
+#include "ProcessHandler.hpp"
 using std::vector;
 using std::string;
 
 class DataHandler
 {
 private:
+    static const QString TAG;
     FileLogHelper mFileLogHelper;
     FilterLogHelper mFilterLogHelper;
+    ProcessHandler mProcessHandler;
     vector<QString> mListMsg;
     vector<QString> mListTag;
     vector<QString> mListPid;
@@ -26,10 +29,12 @@ public:
     QList<Log> &onFilterKeyChanged(const QString &tag, const QString &msg, const QString &level, const QString &pid);
     FileLogHelper& getFileLogHelper();
     QList<Log> refreshLog(const QString &file);
-    bool startWatchLog(QString filePath, QProcess *& process);
-    void clearLogs();
+    int startWatchLog(QString filePath, const QString deviceId);
+    int clearLogcat(const QString deviceId);
     QString previousKey(Ui::MainWindow *ui, QObject *obj);
     QString nextKey(Ui::MainWindow *ui, QObject *obj);
+    QStringList getDeviceIds();
+    int deviceIdChanged(const QString deviceId);
 };
 
 
