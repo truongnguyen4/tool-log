@@ -7,6 +7,8 @@
 #include <QMainWindow>
 #include "NotificationDialog.hpp"
 #include "SettingDialog.hpp"
+#include <QAtomicInteger>
+#include "ProcessHelper.hpp"
 
 using std::vector;
 
@@ -27,19 +29,45 @@ public:
     static constexpr int ERROR_FILE_PATH = -1;
     static constexpr int ERROR_DEVICE_ID = -2;
     static constexpr int ERROR_UNKNOWN = -3;
+    static QStringList simulateDevices;
 
 private:
+
     static const QString TAG;
     Ui::MainWindow *ui;
     UiHandler mUiHandler;
     DataHandler mDataHandler;
     SettingDialog mSettingDialog;
     NotificationDialog mNotificationDialog;
+    ProcessHelper mProcessHandler;
+    // int count = 0;
+    class MainWindowDeviceChangeListener : public ProcessHelper::DeviceChangeListener
+    {
+    public:
+        MainWindowDeviceChangeListener(MainWindow* mw) : mainWindow(mw) {}
+        void onDevicesIsConnected(QStringList deviceIds) override
+        {
+            if (mainWindow) {
+                mainWindow->onChangeConnectDevices(deviceIds, true);
+            }
+        }
+        void onDevicesIsDisconnected(QStringList deviceIds) override
+        {
+            if (mainWindow) {
+                mainWindow->onChangeConnectDevices(deviceIds, false);
+            }
+        }
+    private:
+        MainWindow* mainWindow;
+    };
+    MainWindowDeviceChangeListener* mDeviceListener = new MainWindowDeviceChangeListener(this);
 
-    int isWatching = 0;
+    bool isWatching = 0;
 
     void init();
+    void onStop();
     void onRefreshDeviceIds();
+    void onChangeConnectDevices(QStringList deviceIds, const bool isConnected);
 
     void onReloadTable();
     void onShowItem(QTableWidgetItem *item);
@@ -56,6 +84,7 @@ private:
     void onUpPressed(QObject *obj);
     void onDeviceIdChanged();
     bool eventFilter(QObject *obj, QEvent *event);
+
 signals:
     void downPressed();
     void upPressed();

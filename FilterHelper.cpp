@@ -1,4 +1,4 @@
-#include "FilterLogHelper.hpp"
+#include "FilterHelper.hpp"
 #include "Logger.hpp"
 #include <algorithm>
 #include <optional>
@@ -9,9 +9,9 @@ using std::string;
 using std::vector;
 using std::chrono::steady_clock;
 
-const QString FilterLogHelper::TAG = "FilterLogHelper";
+const QString FilterHelper::TAG = "FilterHelper";
 
-QList<Log> &FilterLogHelper::filterLogs(QList<Log> &logs, int from, int to, string pid, string tag, string msg, string level)
+QList<Log> &FilterHelper::filterLogs(QList<Log> &logs, int from, int to, string pid, string tag, string msg, string level)
 {
     Logger::setTimeFrom("Filter", steady_clock::now());
 

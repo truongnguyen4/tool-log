@@ -10,7 +10,7 @@ QList<Log> &DataHandler::onFilterKeyChanged(const QString &pid, const QString &t
     return mFilterLogHelper.filterLogs(mFileLogHelper.getListLogs(), 1, mFileLogHelper.getSizeFile(), pid.toStdString(), tag.toStdString(), msg.toStdString(), level.toStdString());
 }
 
-FileLogHelper &DataHandler::getFileLogHelper()
+FileHelper &DataHandler::getFileLogHelper()
 {
     return mFileLogHelper;
 }
@@ -23,7 +23,6 @@ QList<Log> DataHandler::refreshLog(const QString &filePath)
         NotificationManager::showError(MainWindow::ERROR_FILE_PATH);
         return QList<Log>();
     }
-
     return mFileLogHelper.readLogsFromFile();
 }
 
@@ -33,23 +32,12 @@ int DataHandler::startWatchLog(QString filePath, const QString deviceId)
     {
         return MainWindow::ERROR_FILE_PATH;
     }
-
-    if (!ProcessHandler::checkDeviceId(deviceId))
-    {
-        return MainWindow::ERROR_DEVICE_ID;
-    }
-    
-    return ProcessHandler::startWatchLog(filePath);
+    return ProcessHelper::startWatchLog(filePath);
 }
 
 int DataHandler::clearLogcat(const QString deviceId)
 {
-    if (!ProcessHandler::checkDeviceId(deviceId))
-    {
-        return MainWindow::ERROR_DEVICE_ID;
-    }
-
-    return ProcessHandler::clearLogcat();
+    return ProcessHelper::clearLogcat();
 }
 
 void DataHandler::addKey(const QString &pid, const QString &tag, const QString &msg, const QString &level)
@@ -150,15 +138,12 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
 
 QStringList DataHandler::getDeviceIds()
 {
-    return ProcessHandler::getDeviceIds();
+    return ProcessHelper::getDeviceIds();
 }
 
 
-int DataHandler::deviceIdChanged(const QString deviceId)
+void DataHandler::deviceIdChanged(const QString deviceId)
 {
-    if (!ProcessHandler::checkDeviceId(deviceId))
-    {
-        return MainWindow::ERROR_DEVICE_ID;
-    }
-    return MainWindow::SUCCESS;
+    Logger::d(TAG, "Device ID changed: " + deviceId);
+    ProcessHelper::mDeviceId = deviceId;
 }

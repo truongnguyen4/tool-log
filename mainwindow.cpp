@@ -9,6 +9,7 @@
 using std::vector;
 
 QString const MainWindow::TAG = "MainWindow";
+QStringList MainWindow::simulateDevices = {};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -81,6 +82,10 @@ void MainWindow::onStart()
     // Data logic
     const QString filePath = ui->file->text().trimmed();
     const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty())
+    {
+        return;
+    }
     const int errorCode = mDataHandler.startWatchLog(filePath, deviceId);
     NotificationManager::showError(errorCode);
     if (errorCode != MainWindow::SUCCESS)
@@ -110,6 +115,24 @@ void MainWindow::onSettings()
 {
     SettingDialog settings(this, ui);
     settings.exec();
+    // switch (count % 5) {
+    //     case 0:
+    //         MainWindow::simulateDevices = {"123456", "654321"};
+    //         break;
+    //     case 1:
+    //         MainWindow::simulateDevices = {"123456", "654321", "111111"};
+    //         break;
+    //     case 2:
+    //         MainWindow::simulateDevices = {"123456", "654321"};
+    //         break;
+    //     case 3:
+    //         MainWindow::simulateDevices = {"654321"};
+    //         break;
+    //     case 4:
+    //         MainWindow::simulateDevices = {"654321", "123456"};
+    //         break;
+    // }
+    // count++;
 }
 
 void MainWindow::onClearMark()
@@ -157,22 +180,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
     }
 
-    auto QLabelClass = qobject_cast<QLabel*>(obj);
-    if (QLabelClass && event->type() == QEvent::MouseButtonPress) {
-        QString objName = obj->objectName();
-        if (objName == ui->devices->objectName())
-        {
-            onRefreshDeviceIds();
-            return true;
-        }
-    }
     return QWidget::eventFilter(obj, event);
-}
-
-void MainWindow::onRefreshDeviceIds()
-{
-    const QStringList deviceIds = mDataHandler.getDeviceIds();
-    mUiHandler.refreshDeviceIds(ui, deviceIds);
 }
 
 void MainWindow::onDeviceIdChanged()
@@ -180,14 +188,27 @@ void MainWindow::onDeviceIdChanged()
     const QString deviceId = ui->device_ids->currentText();
     if (!deviceId.isEmpty())
     {
-        const int errorCode = mDataHandler.deviceIdChanged(deviceId);
-        NotificationManager::showError(errorCode);
+        mDataHandler.deviceIdChanged(deviceId);
     }
+}
+
+void MainWindow::onChangeConnectDevices(QStringList deviceIds, const bool isConnected)
+{
+    mUiHandler.refreshDeviceIds(ui, deviceIds, isConnected);
+    onDeviceIdChanged();
+}
+
+void MainWindow::onStop()
+{
+    Logger::d(TAG, "Closing Application...");
+    mProcessHandler.stop();
 }
 
 void MainWindow::init()
 {
     mUiHandler.initUi(ui);
+    mProcessHandler.init();
+    mProcessHandler.registerDeviceChangeListener(mDeviceListener);
 
     connect(ui->file, &QLineEdit::returnPressed, this, &MainWindow::onRefreshLog);
     connect(ui->pid, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
@@ -216,5 +237,6 @@ void MainWindow::init()
 
     connect(ui->device_ids, &QComboBox::currentTextChanged, this, &MainWindow::onDeviceIdChanged);
 
-    onRefreshDeviceIds();
+    connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::onStop);
+
 }

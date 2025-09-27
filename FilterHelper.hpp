@@ -4,7 +4,7 @@
 #include <string>
 #include <regex>
 #include "Log.hpp"
-#include "FileLogHelper.hpp"
+#include "FileHelper.hpp"
 #include "Logger.hpp"
 
 using std::string;
@@ -12,7 +12,7 @@ using std::vector;
 using std::regex;
 using std::smatch;
 
-class FilterLogHelper
+class FilterHelper
 {
 private:
     static const QString TAG;

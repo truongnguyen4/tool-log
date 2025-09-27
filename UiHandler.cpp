@@ -49,7 +49,7 @@ void UiHandler::updateLogShow(Ui::MainWindow *ui, QTableWidgetItem *item)
     ui->log->setText(item->text());
 }
 
-void UiHandler::markLog(Ui::MainWindow *ui, FileLogHelper &fileLogHelper, QTableWidgetItem *item)
+void UiHandler::markLog(Ui::MainWindow *ui, FileHelper &fileLogHelper, QTableWidgetItem *item)
 {
     const int row = item->row();
     const bool isMarked = fileLogHelper.reverseIsMarkLog(row);
@@ -234,7 +234,7 @@ void UiHandler::setLineEdit(Ui::MainWindow *ui, QObject *obj, const QString &key
     }
 }
 
-void UiHandler::clearMarkLogs(Ui::MainWindow *ui, FileLogHelper &fileLogHelper)
+void UiHandler::clearMarkLogs(Ui::MainWindow *ui, FileHelper &fileLogHelper)
 {
     const int rows = ui->table_logmark->rowCount();
     for (int row = 0; row < rows; row++)
@@ -250,11 +250,29 @@ void UiHandler::clearMarkLogs(Ui::MainWindow *ui, FileLogHelper &fileLogHelper)
     ui->table_logmark->setRowCount(0);
 }
 
-void UiHandler::refreshDeviceIds(Ui::MainWindow *ui, QStringList deviceIds)
+void UiHandler::refreshDeviceIds(Ui::MainWindow *ui, QStringList deviceIds, const bool isConnected)
 {
-    ui->devices->setText("(" + QString::number(deviceIds.size()) + ")");
-    ui->device_ids->clear();
-    ui->device_ids->addItems(deviceIds);
+    if (isConnected)
+    {
+        ui->device_ids->addItems(deviceIds);
+    }
+    else
+    {
+        for (const QString &deviceId : deviceIds)
+        {
+            int index = ui->device_ids->findText(deviceId);
+            if (index != -1)
+            {
+                if (ui->device_ids->currentIndex() == index)
+                {
+                    ui->device_ids->setCurrentIndex(0);
+                }
+                ui->device_ids->removeItem(index);
+            }
+        }
+    }
+    ui->device_ids->update();
+    ui->devices->setText("(" + QString::number(ui->device_ids->count()) + ")");
 }
 
 void UiHandler::startWatching(Ui::MainWindow *ui, const bool isWatching)

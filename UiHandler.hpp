@@ -2,7 +2,7 @@
 #define UIHANDLER_HPP
 #include "Log.hpp"
 #include "./ui_mainwindow.h"
-#include "FileLogHelper.hpp"
+#include "FileHelper.hpp"
 #include <vector>
 #include "HighlightDelegate.hpp"
 
@@ -31,14 +31,14 @@ public:
     void setMsgHighLight(Ui::MainWindow *ui, const QString &msg);
     void loadLogs(Ui::MainWindow *ui, QList<Log> logs);
     void updateLogShow(Ui::MainWindow *ui, QTableWidgetItem *item);
-    void markLog(Ui::MainWindow *ui, FileLogHelper &fileLogHelper, QTableWidgetItem *item = nullptr);
+    void markLog(Ui::MainWindow *ui, FileHelper &fileLogHelper, QTableWidgetItem *item = nullptr);
     void focusLog(Ui::MainWindow *ui, QTableWidgetItem *item);
     void initUi(Ui::MainWindow *ui);
     void updateLogVisibility(Ui::MainWindow *ui, QList<Log> &logs);
     void clearLogcat(Ui::MainWindow *ui);
     void setLineEdit(Ui::MainWindow *ui, QObject *obj, const QString &key);
-    void clearMarkLogs(Ui::MainWindow *ui, FileLogHelper &fileLogHelper);
-    void refreshDeviceIds(Ui::MainWindow *ui, QStringList deviceIds);
+    void clearMarkLogs(Ui::MainWindow *ui, FileHelper &fileLogHelper);
+    void refreshDeviceIds(Ui::MainWindow *ui, QStringList deviceIds, const bool isConnected);
     void startWatching(Ui::MainWindow *ui, const bool startWatch);
     template <typename... Args>
     void clearTextInput(Args &&...textBoxes)

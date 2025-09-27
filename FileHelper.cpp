@@ -1,23 +1,21 @@
-#include "FileLogHelper.hpp"
+#include "FileHelper.hpp"
 #include <regex>
 #include <fstream>
 #include <QFile>
 #include "Logger.hpp"
 #include "NotificationDialog.hpp"
 #include "QString"
-#include "ProcessHandler.hpp"
-#include "mainwindow.h"
 
 using std::string;
 using std::vector;
 
-const QString FileLogHelper::TAG = "FileLogHelper";
-QString FileLogHelper::mFilePath = "";
+const QString FileHelper::TAG = "FileHelper";
+QString FileHelper::mFilePath = "";
 
-const std::regex FileLogHelper::logcatPattern(
+const std::regex FileHelper::logcatPattern(
     R"(^(\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d+)\s+(\d+)\s+(\d+)\s+([A-Zdiewv])\s+([^:]+):\s+(.*)$)", std::regex::icase);
 
-void FileLogHelper::readLog(const QString &filePath)
+void FileHelper::readLog(const QString &filePath)
 {
     Logger::d(TAG, "Reading log file: " + filePath);
 
@@ -42,7 +40,7 @@ void FileLogHelper::readLog(const QString &filePath)
     file.close();
 }
 
-Log FileLogHelper::convertLog(const string &line)
+Log FileHelper::convertLog(const string &line)
 {
     std::smatch matches;
     Log log;
@@ -63,23 +61,25 @@ Log FileLogHelper::convertLog(const string &line)
     return log;
 }
 
-void FileLogHelper::setFilePath(const QString &filePath)
+void FileHelper::setFilePath(const QString &filePath)
 {
     mFilePath = filePath;
 }
 
-QList<Log> FileLogHelper::readLogsFromFile()
+QList<Log> FileHelper::readLogsFromFile()
 {
+    QMutexLocker locker(&mtxListLog);
     readLog(mFilePath);
     return mListLogs;
 }
 
-QList<Log> &FileLogHelper::getListLogs()
+QList<Log> &FileHelper::getListLogs()
 {
+    QMutexLocker locker(&mtxListLog);
     return mListLogs;
 }
 
-QString FileLogHelper::getNameFile()
+QString FileHelper::getNameFile()
 {
     if (mFilePath.isEmpty())
     {
@@ -97,22 +97,25 @@ QString FileLogHelper::getNameFile()
     return "default.log";
 }
 
-int FileLogHelper::getSizeFile()
+int FileHelper::getSizeFile()
 {
+    QMutexLocker locker(&mtxListLog);
     return mListLogs.size();
 }
 
-bool FileLogHelper::reverseIsMarkLog(int index)
+bool FileHelper::reverseIsMarkLog(int index)
 {
+    QMutexLocker locker(&mtxListLog);
     return mListLogs[index].revertIsMarked();
 }
 
-Log FileLogHelper::getLog(int index)
+Log FileHelper::getLog(int index)
 {
+    QMutexLocker locker(&mtxListLog);
     return mListLogs[index];
 }
 
-bool FileLogHelper::checkPath(const QString &filePath)
+bool FileHelper::checkPath(const QString &filePath)
 {
     std::string filePathStr = filePath.toStdString();
     if (filePathStr.empty())
@@ -151,12 +154,7 @@ bool FileLogHelper::checkPath(const QString &filePath)
         Logger::d(TAG, "Log file created: " + filePath);
         outfile.close();
     }
-    FileLogHelper::mFilePath = filePath;
+    FileHelper::mFilePath = filePath;
     return true;
 }
-
-
-
-
-
 

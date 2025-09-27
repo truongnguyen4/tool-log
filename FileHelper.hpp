@@ -4,16 +4,18 @@
 #include "Log.hpp"
 #include <regex>
 #include <QProcess>
+#include <QMutex>
 
 using std::string;
 using std::vector;
 using std::regex;
-class FileLogHelper : public QObject
+class FileHelper : public QObject
 {
     Q_OBJECT
 private:
     static const QString TAG;
     static const regex logcatPattern;
+    QMutex mtxListLog;
     QList<Log> mListLogs;
     QProcess *mProcessLogcat = nullptr;
     void readLog(const QString &filePath);
