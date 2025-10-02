@@ -8,43 +8,56 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-# set(Qt6_DIR "/path/to/Qt/6.9.1/gcc_64/lib/cmake/Qt6")
+set(Qt6_DIR "/path/to/Qt/6.9.1/gcc_64/lib/cmake/Qt6")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
+set(CONTROLLER
+    UiHandler.hpp
+    UiHandler.cpp
+    DataHandler.hpp
+    DataHandler.cpp
+)
+
+set(MODEL
+    FileHelper.hpp
+    FileHelper.cpp
+    ProcessHelper.hpp
+    ProcessHelper.cpp
+    NotificationHelper.hpp
+    NotificationHelper.cpp
+    LogHelper.hpp
+    LogHelper.cpp
+)
+
+
+set(UTIL
+    Log.hpp
+    Log.cpp
+    Logger.hpp
+    Logger.cpp
+    NotificationDialog.hpp
+    NotificationDialog.cpp
+    SettingDialog.hpp
+    SettingDialog.cpp
+    HighlightDelegate.hpp
+    HighlightDelegate.cpp
+)
+
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        Log.hpp
-        Log.cpp
-        FileHelper.hpp
-        FileHelper.cpp
-        Logger.hpp
-        Logger.cpp
-        FilterHelper.hpp
-        FilterHelper.cpp
-        UiHandler.hpp
-        UiHandler.cpp
-        DataHandler.hpp
-        DataHandler.cpp
-        HighlightDelegate.hpp
-        HighlightDelegate.cpp
-        NotificationDialog.hpp
-        NotificationDialog.cpp
-        Settings.ui
-        SettingDialog.hpp
-        SettingDialog.cpp
-        ProcessHelper.hpp
-        ProcessHelper.cpp
-        NotificationManager.hpp
-        NotificationManager.cpp
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
+    Settings.ui
+    ${UTIL}
+    ${MODEL}
+    ${CONTROLLER}
 )
 
 qt_add_executable(tool-log
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
-
 )
 
 target_link_libraries(tool-log PRIVATE Qt6::Widgets)

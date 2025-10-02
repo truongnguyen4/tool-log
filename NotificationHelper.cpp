@@ -1,10 +1,10 @@
-#include "NotificationManager.hpp"
+#include "NotificationHelper.hpp"
 #include "NotificationDialog.hpp"
 #include "mainwindow.h"
 
-const QString NotificationManager::TAG = "NotificationManager";
+const QString NotificationHelper::TAG = "NotificationHelper";
 
-void NotificationManager::showError(const int &errorCode)
+void NotificationHelper::showError(const int &errorCode)
 {
     if (errorCode != MainWindow::SUCCESS)
     {

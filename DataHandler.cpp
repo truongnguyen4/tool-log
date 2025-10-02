@@ -1,85 +1,98 @@
 #include "DataHandler.hpp"
 #include "mainwindow.h"
-#include "NotificationManager.hpp"
-
+#include "NotificationHelper.hpp"
+#include "LogHelper.hpp"
+#include "Logger.hpp"
 const QString DataHandler::TAG = "DataHandler";
 
-QList<Log> &DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
+QList<Log> DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
     addKey(pid, tag, msg, level);
-    return mFilterLogHelper.filterLogs(mFileLogHelper.getListLogs(), 1, mFileLogHelper.getSizeFile(), pid.toStdString(), tag.toStdString(), msg.toStdString(), level.toStdString());
-}
-
-FileHelper &DataHandler::getFileLogHelper()
-{
-    return mFileLogHelper;
+    QStringList pids = pid.split("|", Qt::SkipEmptyParts);
+    QStringList tags = tag.split("|", Qt::SkipEmptyParts);
+    QStringList messages = msg.split("|", Qt::SkipEmptyParts);
+    QStringList levels = level.split("|", Qt::SkipEmptyParts);
+    return LogHelper::filterLogs(LogHelper::mListLogs, 1, LogHelper::mListLogs.size(), pids, tags, messages, levels);
 }
 
 QList<Log> DataHandler::refreshLog(const QString &filePath)
 {
-    if (!mFileLogHelper.checkPath(filePath))
+    if (!FileHelper::checkPath(filePath))
     {
         Logger::d(TAG, "refreshLog");
-        NotificationManager::showError(MainWindow::ERROR_FILE_PATH);
+        NotificationHelper::showError(MainWindow::ERROR_FILE_PATH);
         return QList<Log>();
     }
-    return mFileLogHelper.readLogsFromFile();
+    LogHelper::mListLogs = mFileLogHelper.readLogsFromFile(filePath);
+    return LogHelper::mListLogs;
 }
 
 int DataHandler::startWatchLog(QString filePath, const QString deviceId)
 {
-    if (!mFileLogHelper.checkPath(filePath))
-    {
-        return MainWindow::ERROR_FILE_PATH;
-    }
-    return ProcessHelper::startWatchLog(filePath);
+    return ProcessHelper::startWatchLog(filePath, deviceId);
 }
 
 int DataHandler::clearLogcat(const QString deviceId)
 {
-    return ProcessHelper::clearLogcat();
+    LogHelper::mListLogs.clear();
+    return ProcessHelper::clearLogcat(deviceId);
 }
 
 void DataHandler::addKey(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
-    if (pid != "")
+    if (!pid.isEmpty())
     {
-        if ((mListPid.size() > 0 && pid != mListPid.at(mPidId))
-            || mPidId == mListPid.size() - 1
-            || mListPid.size() == 0)
+        if (!mListPid.contains(pid))
         {
             mListPid.push_back(pid);
             mPidId = mListPid.size() - 1;
+        } 
+        else 
+        {
+            // Swap exist key to the last
+            mListPid.append(mListPid.takeAt(mListPid.indexOf(pid)));
         }
     }
-    if (tag != "")
+
+    if (!tag.isEmpty())
     {
-        if ((mListTag.size() > 0 && tag != mListTag.at(mTagId))
-            || mTagId == mListTag.size() - 1
-            || mListTag.size() == 0)
+        if (!mListTag.contains(tag))
         {
             mListTag.push_back(tag);
             mTagId = mListTag.size() - 1;
+        } 
+        else 
+        {
+            // Swap exist key to the last
+            mListTag.append(mListTag.takeAt(mListTag.indexOf(tag)));
         }
     }
-    if (msg != "")
+
+    if (!msg.isEmpty())
     {
-        if ((mListMsg.size() > 0 && msg != mListMsg.at(mMsgId))
-            || mMsgId == mListMsg.size() - 1
-            || mListMsg.size() == 0)
+        if (!mListMsg.contains(msg))
         {
             mListMsg.push_back(msg);
             mMsgId = mListMsg.size() - 1;
+        } 
+        else 
+        {
+            // Swap exist key to the last
+            mListMsg.append(mListMsg.takeAt(mListMsg.indexOf(msg)));
         }
     }
-    if (level != "")
+
+    if (!level.isEmpty())
     {
-        if ((mListLevel.size() > 0 && level != mListLevel.at(mLevelId))
-            || mLevelId == mListLevel.size() - 1
-            || mListLevel.size() == 0)
+        if (!mListLevel.contains(level))
         {
             mListLevel.push_back(level);
             mLevelId = mListLevel.size() - 1;
+        } 
+        else 
+        {
+            // Swap exist key to the last
+            mListLevel.append(mListLevel.takeAt(mListLevel.indexOf(level)));
         }
     }
 }
@@ -88,24 +101,35 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
 {
     if (obj == ui->pid)
     {
-        mPidId = mPidId - 1 < 0 ? 0 : mPidId - 1;
-        Logger::d(TAG, "previousKey -> pid = " + QString::number(mPidId));
-        return mListPid.empty() ? "" : mListPid.at(mPidId);
+        if (!mListPid.empty())
+        {
+            mPidId = mPidId - 1 < 0 ? 0 : mPidId - 1;
+            return mListPid.at(mPidId);
+        }
     }
     if (obj == ui->tag)
     {
-        mTagId = mTagId - 1 < 0 ? 0 : mTagId - 1;
-        return mListTag.empty() ? "" : mListTag.at(mTagId);
+        if (!mListTag.empty())
+        {
+            mTagId = mTagId - 1 < 0 ? 0 : mTagId - 1;
+            return mListTag.at(mTagId);
+        }
     }
     if (obj == ui->msg)
     {
-        mMsgId = mMsgId - 1 < 0 ? 0 : mMsgId - 1;
-        return mListMsg.empty() ? "" : mListMsg.at(mMsgId);
+        if (!mListMsg.empty())
+        {
+            mMsgId = mMsgId - 1 < 0 ? 0 : mMsgId - 1;
+            return mListMsg.at(mMsgId);
+        }
     }
     if (obj == ui->level)
     {
-        mLevelId = mLevelId - 1 < 0 ? 0 : mLevelId - 1;
-        return mListLevel.empty() ? "" : mListLevel.at(mLevelId);
+        if (!mListLevel.empty())
+        {
+            mLevelId = mLevelId - 1 < 0 ? 0 : mLevelId - 1;
+            return mListLevel.at(mLevelId);
+        }
     }
     return "";
 }
@@ -114,36 +138,35 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
 {
     if (obj == ui->pid)
     {
-        mPidId = mPidId + 1 >= mListPid.size() ? mListPid.size() - 1 : mPidId + 1;
-        Logger::d(TAG, "nextKey -> pid = " + QString::number(mPidId));
-        return mListPid.at(mPidId);
+        if (!mListPid.empty())
+        {
+            mPidId = mPidId + 1 >= mListPid.size() ? mListPid.size() - 1 : mPidId + 1;
+            return mListPid.at(mPidId);
+        }
     }
     if (obj == ui->tag)
     {
-        mTagId = mTagId + 1 >= mListTag.size() ? mListTag.size() - 1 : mTagId + 1;
-        return mListTag.at(mTagId);
+        if (!mListTag.empty())
+        {
+            mTagId = mTagId + 1 >= mListTag.size() ? mListTag.size() - 1 : mTagId + 1;
+            return mListTag.at(mTagId);
+        }
     }
     if (obj == ui->msg)
     {
-        mMsgId = mMsgId + 1 >= mListMsg.size() ? mListMsg.size() - 1 : mMsgId + 1;
-        return mListMsg.at(mMsgId);
+        if (!mListMsg.empty())
+        {
+            mMsgId = mMsgId + 1 >= mListMsg.size() ? mListMsg.size() - 1 : mMsgId + 1;
+            return mListMsg.at(mMsgId);
+        }
     }
     if (obj == ui->level)
     {
-        mLevelId = mLevelId + 1 >= mListLevel.size() ? mListLevel.size() - 1 : mLevelId + 1;
-        return mListLevel.at(mLevelId);
+        if (!mListLevel.empty())
+        {
+            mLevelId = mLevelId + 1 >= mListLevel.size() ? mListLevel.size() - 1 : mLevelId + 1;
+            return mListLevel.at(mLevelId);
+        }
     }
     return "";
-}
-
-QStringList DataHandler::getDeviceIds()
-{
-    return ProcessHelper::getDeviceIds();
-}
-
-
-void DataHandler::deviceIdChanged(const QString deviceId)
-{
-    Logger::d(TAG, "Device ID changed: " + deviceId);
-    ProcessHelper::mDeviceId = deviceId;
 }

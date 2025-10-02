@@ -1,10 +1,12 @@
 #include "UiHandler.hpp"
 #include <QTableWidgetItem>
 #include "Logger.hpp"
-#include <string>
 #include <QScrollBar>
 #include "Constant.hpp"
 #include "mainwindow.h"
+#include <QDateTime>
+#include "LogHelper.hpp"
+
 const QString UiHandler::TAG = "UiHandler";
 //============== Public methods ==============
 
@@ -33,13 +35,13 @@ void UiHandler::loadLogs(Ui::MainWindow *ui, QList<Log> logs)
         const int row = ui->table_logs->rowCount();
         ui->table_logs->insertRow(row);
         ui->table_logs->setItem(row, Constant::TableLog::COL_LINE, new QTableWidgetItem(QString::number(log.getLine())));
-        ui->table_logs->setItem(row, Constant::TableLog::COL_DATE, new QTableWidgetItem(QString::fromStdString(log.getDate())));
-        ui->table_logs->setItem(row, Constant::TableLog::COL_TIME, new QTableWidgetItem(QString::fromStdString(log.getTime())));
-        ui->table_logs->setItem(row, Constant::TableLog::COL_PID, new QTableWidgetItem(QString::fromStdString(log.getPid())));
-        ui->table_logs->setItem(row, Constant::TableLog::COL_TID, new QTableWidgetItem(QString::fromStdString(log.getTid())));
-        ui->table_logs->setItem(row, Constant::TableLog::COL_LEVEL, new QTableWidgetItem(QString::fromStdString(log.getLevel())));
-        ui->table_logs->setItem(row, Constant::TableLog::COL_TAG, new QTableWidgetItem(QString::fromStdString(log.getTag())));
-        ui->table_logs->setItem(row, Constant::TableLog::COL_MSG, new QTableWidgetItem(QString::fromStdString(log.getMsg())));
+        ui->table_logs->setItem(row, Constant::TableLog::COL_DATE, new QTableWidgetItem(log.getDate()));
+        ui->table_logs->setItem(row, Constant::TableLog::COL_TIME, new QTableWidgetItem(log.getTime()));
+        ui->table_logs->setItem(row, Constant::TableLog::COL_PID, new QTableWidgetItem(log.getPid()));
+        ui->table_logs->setItem(row, Constant::TableLog::COL_TID, new QTableWidgetItem(log.getTid()));
+        ui->table_logs->setItem(row, Constant::TableLog::COL_LEVEL, new QTableWidgetItem(log.getLevel()));
+        ui->table_logs->setItem(row, Constant::TableLog::COL_TAG, new QTableWidgetItem(log.getTag()));
+        ui->table_logs->setItem(row, Constant::TableLog::COL_MSG, new QTableWidgetItem(log.getMsg()));
     }
     ui->table_logs->setUpdatesEnabled(true);
 }
@@ -49,12 +51,12 @@ void UiHandler::updateLogShow(Ui::MainWindow *ui, QTableWidgetItem *item)
     ui->log->setText(item->text());
 }
 
-void UiHandler::markLog(Ui::MainWindow *ui, FileHelper &fileLogHelper, QTableWidgetItem *item)
+void UiHandler::markLog(Ui::MainWindow *ui, QTableWidgetItem *item)
 {
     const int row = item->row();
-    const bool isMarked = fileLogHelper.reverseIsMarkLog(row);
+    const bool isMarked = LogHelper::mListLogs[row].revertIsMarked();
     const int rows = ui->table_logmark->rowCount();
-    const Log log = fileLogHelper.getLog(row);
+    const Log log = LogHelper::mListLogs[row];
 
     if (isMarked)
     {
@@ -63,9 +65,9 @@ void UiHandler::markLog(Ui::MainWindow *ui, FileHelper &fileLogHelper, QTableWid
         QTableWidgetItem *itemLine = new QTableWidgetItem();
         itemLine->setData(Qt::DisplayRole, log.getLine());
         ui->table_logmark->setItem(rows, Constant::TableLogMark::COL_LINE, itemLine);
-        ui->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, new QTableWidgetItem(QString::fromStdString(log.getPid())));
-        ui->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, new QTableWidgetItem(QString::fromStdString(log.getTag())));
-        ui->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, new QTableWidgetItem(QString::fromStdString(log.getMsg())));
+        ui->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, new QTableWidgetItem(log.getPid()));
+        ui->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, new QTableWidgetItem(log.getTag()));
+        ui->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, new QTableWidgetItem(log.getMsg()));
 
         ui->table_logmark->setSortingEnabled(true);   // enable sorting to sort table logmark
         ui->table_logmark->sortItems(Constant::TableLogMark::COL_LINE, Qt::SortOrder::AscendingOrder);
@@ -185,25 +187,14 @@ void UiHandler::initUi(Ui::MainWindow *ui)
 
 void UiHandler::updateLogVisibility(Ui::MainWindow *ui, QList<Log> &logs)
 {
-    if (logs.isEmpty())
-    {
-        ui->table_logs->setUpdatesEnabled(false);
-        for (int row = 0; row < ui->table_logs->rowCount(); ++row)
-        {
-            ui->table_logs->setRowHidden(row, false);
-        }
-        ui->table_logs->setUpdatesEnabled(true);
-        return;
-    }
-
-    Logger::setTimeFrom("Set hidden", steady_clock::now());
+    Logger::setTimeFrom("Set hidden", QDateTime::currentMSecsSinceEpoch());
     ui->table_logs->setUpdatesEnabled(false);
     for (const Log &log : logs)
     {
         ui->table_logs->setRowHidden(log.getLine() - 1, log.getHidden());
     }
     ui->table_logs->setUpdatesEnabled(true);
-    Logger::setTimeTo("Set hidden", steady_clock::now());
+    Logger::setTimeTo("Set hidden", QDateTime::currentMSecsSinceEpoch());
 }
 
 void UiHandler::clearLogcat(Ui::MainWindow *ui)
@@ -234,7 +225,7 @@ void UiHandler::setLineEdit(Ui::MainWindow *ui, QObject *obj, const QString &key
     }
 }
 
-void UiHandler::clearMarkLogs(Ui::MainWindow *ui, FileHelper &fileLogHelper)
+void UiHandler::clearMarkLogs(Ui::MainWindow *ui)
 {
     const int rows = ui->table_logmark->rowCount();
     for (int row = 0; row < rows; row++)
@@ -244,7 +235,7 @@ void UiHandler::clearMarkLogs(Ui::MainWindow *ui, FileHelper &fileLogHelper)
         {
             int row = itemLine->data(Qt::DisplayRole).toInt() - 1;
             setHighLightMarkRow(ui->table_logs, row);
-            fileLogHelper.reverseIsMarkLog(row);
+            LogHelper::mListLogs[row].revertIsMarked();
         }
     }
     ui->table_logmark->setRowCount(0);

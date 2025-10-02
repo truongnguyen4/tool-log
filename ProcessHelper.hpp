@@ -7,23 +7,23 @@
 
 class ProcessHelper {
 public:
-    static QString mDeviceId;
+    ProcessHelper();
     static QString runShellCommand(const QString &program, const QStringList &command_args);
     static QStringList getDeviceIds();
-    static int clearLogcat();
-    static int startWatchLog(const QString filePath);
+    static int clearLogcat(const QString deviceId);
+    static int startWatchLog(const QString filePath, const QString deviceId);
     class DeviceChangeListener {
     public:
         virtual void onDevicesIsConnected(QStringList deviceIds) = 0;
         virtual void onDevicesIsDisconnected(QStringList deviceIds) = 0;
     };
-    void init();
     void stop();
     void registerDeviceChangeListener(DeviceChangeListener* listener);
     void unregisterDeviceChangeListener(DeviceChangeListener* listener);
+
 private:
     static const QString TAG;
-    static QProcess* process;
+    static QProcess* processReadLogCat;
     QMutex mtxCurrentDeviceIds;
     void detectDevices();
     QThread* mThreadDetectDevices;

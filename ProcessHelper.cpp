@@ -5,8 +5,7 @@
 #include <QThread>
 
 QString const ProcessHelper::TAG = "ProcessHelper";
-QProcess* ProcessHelper::process = new QProcess();
-QString ProcessHelper::mDeviceId = "";
+QProcess* ProcessHelper::processReadLogCat = new QProcess();
 
 void ProcessHelper::registerDeviceChangeListener(DeviceChangeListener* listener) {
     if (listener == nullptr) {
@@ -34,7 +33,6 @@ QString ProcessHelper::runShellCommand(const QString &program, const QStringList
     process->start(program, args);
     process->waitForFinished();
 
-    Logger::d(TAG, "runShellCommand: " + program + " " + ", PID = " + QString::number(process->processId()) + ", DEVICE ID = " + ProcessHelper::mDeviceId);
     QString output = process->readAllStandardOutput();
     delete process;
 
@@ -61,41 +59,49 @@ QStringList ProcessHelper::getDeviceIds()
     // return MainWindow::simulateDevices;
 }
 
-int ProcessHelper::clearLogcat()
+int ProcessHelper::clearLogcat(const QString deviceId)
 {
-    if (ProcessHelper::mDeviceId.isEmpty())
+    if (deviceId.isEmpty())
     {
         Logger::d(TAG, "Can't clear log due to DEVICE ID is empty.");
         return MainWindow::ERROR_DEVICE_ID;
     }
-    runShellCommand("adb", QStringList() << "-s" << ProcessHelper::mDeviceId << "logcat" << "-c");
+    Logger::d(TAG, "Clear logcat on DEVICE ID = " + deviceId);
+    runShellCommand("adb", QStringList() << "-s" << deviceId << "logcat" << "-c");
     return MainWindow::SUCCESS;
 }
 
-int ProcessHelper::startWatchLog(const QString filePath)
+int ProcessHelper::startWatchLog(const QString filePath, const QString deviceId)
 {
     // Check if the file is already being watched, stop the current watch
-    if (process->state() == QProcess::Running)
+    if (processReadLogCat->state() == QProcess::Running)
     {
-        ProcessHelper::process->kill();
-        ProcessHelper::process->waitForFinished();
+        processReadLogCat->kill();
+        processReadLogCat->waitForFinished();
         Logger::d(TAG, "Stop watching log");
         return MainWindow::SUCCESS;
     }
 
-    if (ProcessHelper::mDeviceId.isEmpty())
+    if (deviceId.isEmpty())
     {
         Logger::d(TAG, "Can't start watching device due to DEVICE ID is empty.");
         return MainWindow::ERROR_DEVICE_ID;
     }
-    ProcessHelper::process->setStandardOutputFile(filePath, QIODevice::NewOnly);
-    ProcessHelper::process->start("adb", QStringList() << "-s" << ProcessHelper::mDeviceId << "logcat");
-    Logger::d(TAG, "Start watching log, PID = " + QString::number(process->processId()) + ", DEVICE ID = " + ProcessHelper::mDeviceId);
+
+    if (!FileHelper::checkPath(filePath))
+    {
+        Logger::d(TAG, "Can't start watching log due to FILE PATH is invalid.");
+        return MainWindow::ERROR_FILE_PATH;
+    }
+
+    ProcessHelper::processReadLogCat->setStandardOutputFile(filePath, QIODevice::NewOnly);
+    ProcessHelper::processReadLogCat->start("adb", QStringList() << "-s" << deviceId << "logcat");
+    Logger::d(TAG, "Start watching log, PID = " + QString::number(processReadLogCat->processId()) + ", DEVICE ID = " + deviceId);
 
     return MainWindow::SUCCESS;
 }
 
-void ProcessHelper::init()
+ProcessHelper::ProcessHelper()
 {
     mThreadDetectDevices = QThread::create([=]() {
         detectDevices();
@@ -120,18 +126,14 @@ void ProcessHelper::stop()
 void ProcessHelper::detectDevices()
 {
     Logger::d(TAG, "Start detecting devices");
-    QMutexLocker locker(&mtxCurrentDeviceIds);
     mCurrentDeviceIds = getDeviceIds();
-    locker.unlock();
 
     while (true)
     {
         QThread::sleep(1); // delay 1 seconds
         QStringList newDeviceIds = getDeviceIds();
-        locker.relock();
         if (newDeviceIds == mCurrentDeviceIds)
         {
-            locker.unlock();
             continue;
         }
         if (newDeviceIds.size() > mCurrentDeviceIds.size()) {
@@ -159,6 +161,5 @@ void ProcessHelper::detectDevices()
         }
         Logger::d(TAG, "Update mCurrentDeviceIds");
         mCurrentDeviceIds = newDeviceIds;
-        locker.unlock();
     }
 }

@@ -1,20 +1,18 @@
 #ifndef LOG_HPP
 #define LOG_HPP
-#include <string>
-
-using std::string;
+#include <QString>
 
 class Log
 {
 private:
     int line = 0;
-    string date = "default";
-    string time = "default";
-    string pid = "default";
-    string tid = "default";
-    string level = "default";
-    string tag = "default";
-    string msg = "default";
+    QString date = "default";
+    QString time = "default";
+    QString pid = "default";
+    QString tid = "default";
+    QString level = "default";
+    QString tag = "default";
+    QString msg = "default";
     bool isHidden = false;
     bool isMarked = false;
 
@@ -24,28 +22,28 @@ public:
     Log();
 
     const int &getLine() const;
-    const string &getDate() const;
-    const string &getTime() const;
-    const string &getPid() const;
-    const string &getTid() const;
-    const string &getLevel() const;
-    const string &getTag() const;
-    const string &getMsg() const;
+    const QString &getDate() const;
+    const QString &getTime() const;
+    const QString &getPid() const;
+    const QString &getTid() const;
+    const QString &getLevel() const;
+    const QString &getTag() const;
+    const QString &getMsg() const;
     const bool &getHidden() const;
     const bool &getIsMarked() const;
 
-    void setDate(const string &value);
-    void setTime(const string &value);
-    void setPid(const string &value);
-    void setTid(const string &value);
-    void setLevel(const string &value);
-    void setTag(const string &value);
-    void setMsg(const string &value);
+    void setDate(const QString &value);
+    void setTime(const QString &value);
+    void setPid(const QString &value);
+    void setTid(const QString &value);
+    void setLevel(const QString &value);
+    void setTag(const QString &value);
+    void setMsg(const QString &value);
     void setHidden(const bool &value);
 
     bool revertIsMarked();
 
-    string toString() const;
+    QString toString() const;
 
 };
 

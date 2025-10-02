@@ -1,8 +1,8 @@
-#ifndef NOTIFICATIONMANAGER_HPP
-#define NOTIFICATIONMANAGER_HPP
+#ifndef NOTIFICATIONHELPER_H
+#define NOTIFICATIONHELPER_H
 #include <QString>
 
-class NotificationManager
+class NotificationHelper
 {
 private:
     static const QString TAG;
@@ -11,4 +11,4 @@ public:
 };
 
 
-#endif // NOTIFICATIONMANAGER_HPP
+#endif // NOTIFICATIONHELPER_H

@@ -3,10 +3,9 @@
 #include <QDebug>
 #include "Log.hpp"
 #include <QTableWidgetItem>
-#include <QSize>
-#include "NotificationManager.hpp"
-
-using std::vector;
+#include "NotificationHelper.hpp"
+#include <QDateTime>
+#include "Logger.hpp"
 
 QString const MainWindow::TAG = "MainWindow";
 QStringList MainWindow::simulateDevices = {};
@@ -30,11 +29,7 @@ void MainWindow::onReloadTable()
     QString msg = ui->msg->text().trimmed();
     QString level = ui->level->text().trimmed();
 
-    QList<Log> logs;
-    if (!pid.isEmpty() || !tag.isEmpty() || !msg.isEmpty() || !level.isEmpty())
-    {
-        logs = mDataHandler.onFilterKeyChanged(pid, tag, msg, level);
-    }
+    QList<Log> logs = mDataHandler.onFilterKeyChanged(pid, tag, msg, level);
     mUiHandler.updateLogVisibility(ui, logs);
 }
 
@@ -45,7 +40,7 @@ void MainWindow::onShowItem(QTableWidgetItem *item)
 
 void MainWindow::onMarkItem(QTableWidgetItem *item)
 {
-    mUiHandler.markLog(ui, mDataHandler.getFileLogHelper(), item);
+    mUiHandler.markLog(ui, item);
 }
 
 void MainWindow::onFocusItem(QTableWidgetItem *item)
@@ -87,7 +82,7 @@ void MainWindow::onStart()
         return;
     }
     const int errorCode = mDataHandler.startWatchLog(filePath, deviceId);
-    NotificationManager::showError(errorCode);
+    NotificationHelper::showError(errorCode);
     if (errorCode != MainWindow::SUCCESS)
     {
         return;
@@ -108,36 +103,18 @@ void MainWindow::onClear()
     mUiHandler.clearLogcat(ui);
     const QString deviceId = ui->device_ids->currentText().trimmed();
     int errorCode = mDataHandler.clearLogcat(deviceId);
-    NotificationManager::showError(errorCode);
+    NotificationHelper::showError(errorCode);
 }
 
 void MainWindow::onSettings()
 {
     SettingDialog settings(this, ui);
     settings.exec();
-    // switch (count % 5) {
-    //     case 0:
-    //         MainWindow::simulateDevices = {"123456", "654321"};
-    //         break;
-    //     case 1:
-    //         MainWindow::simulateDevices = {"123456", "654321", "111111"};
-    //         break;
-    //     case 2:
-    //         MainWindow::simulateDevices = {"123456", "654321"};
-    //         break;
-    //     case 3:
-    //         MainWindow::simulateDevices = {"654321"};
-    //         break;
-    //     case 4:
-    //         MainWindow::simulateDevices = {"654321", "123456"};
-    //         break;
-    // }
-    // count++;
 }
 
 void MainWindow::onClearMark()
 {
-    mUiHandler.clearMarkLogs(ui, mDataHandler.getFileLogHelper());
+    mUiHandler.clearMarkLogs(ui);
 }
 
 void MainWindow::onDownPressed(QObject *obj)
@@ -186,10 +163,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 void MainWindow::onDeviceIdChanged()
 {
     const QString deviceId = ui->device_ids->currentText();
-    if (!deviceId.isEmpty())
-    {
-        mDataHandler.deviceIdChanged(deviceId);
-    }
 }
 
 void MainWindow::onChangeConnectDevices(QStringList deviceIds, const bool isConnected)
@@ -207,7 +180,6 @@ void MainWindow::onStop()
 void MainWindow::init()
 {
     mUiHandler.initUi(ui);
-    mProcessHandler.init();
     mProcessHandler.registerDeviceChangeListener(mDeviceListener);
 
     connect(ui->file, &QLineEdit::returnPressed, this, &MainWindow::onRefreshLog);
@@ -224,19 +196,13 @@ void MainWindow::init()
 
     connect(ui->table_logs, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
     connect(ui->table_logs, &QTableWidget::itemDoubleClicked, this, &MainWindow::onMarkItem);
-
     connect(ui->table_logmark, &QTableWidget::itemClicked, this, &MainWindow::onFocusItem);
-
     connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onSetTagHighLight);
     connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onSetMsgHighLight);
-
     connect(ui->start, &QPushButton::pressed, this, &MainWindow::onStart);
     connect(ui->clear, &QPushButton::pressed, this, &MainWindow::onClear);
     connect(ui->setting, &QPushButton::pressed, this, &MainWindow::onSettings);
     connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
-
     connect(ui->device_ids, &QComboBox::currentTextChanged, this, &MainWindow::onDeviceIdChanged);
-
     connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::onStop);
-
 }

@@ -1,5 +1,4 @@
 #include "Log.hpp"
-#include "Logger.hpp"
 
 int Log::static_id = 1;
 
@@ -7,23 +6,23 @@ Log::Log() : line(static_id++) {}
 
 const int &Log::getLine() const { return line; }
 
-const string &Log::getDate() const { return date; }
-const string &Log::getTime() const { return time; }
-const string &Log::getPid() const { return pid; }
-const string &Log::getTid() const { return tid; }
-const string &Log::getLevel() const { return level; }
-const string &Log::getTag() const { return tag; }
-const string &Log::getMsg() const { return msg; }
+const QString &Log::getDate() const { return date; }
+const QString &Log::getTime() const { return time; }
+const QString &Log::getPid() const { return pid; }
+const QString &Log::getTid() const { return tid; }
+const QString &Log::getLevel() const { return level; }
+const QString &Log::getTag() const { return tag; }
+const QString &Log::getMsg() const { return msg; }
 const bool &Log::getHidden() const { return isHidden; }
 const bool &Log::getIsMarked() const { return isMarked; }
 
-void Log::setDate(const string &d) { date = d; }
-void Log::setTime(const string &t) { time = t; }
-void Log::setPid(const string &p) { pid = p; }
-void Log::setTid(const string &t) { tid = t; }
-void Log::setLevel(const string &l) { level = l; }
-void Log::setTag(const string &t) { tag = t; }
-void Log::setMsg(const string &m) { msg = m; }
+void Log::setDate(const QString &d) { date = d; }
+void Log::setTime(const QString &t) { time = t; }
+void Log::setPid(const QString &p) { pid = p; }
+void Log::setTid(const QString &t) { tid = t; }
+void Log::setLevel(const QString &l) { level = l; }
+void Log::setTag(const QString &t) { tag = t; }
+void Log::setMsg(const QString &m) { msg = m; }
 void Log::setHidden(const bool &d) { isHidden = d; }
 bool Log::revertIsMarked()
 {
@@ -31,9 +30,9 @@ bool Log::revertIsMarked()
     return isMarked;
 }
 
-string Log::toString() const
+QString Log::toString() const
 {
-    return  std::to_string(line) +
+    return  QString::number(line) +
            "  " + date +
            "  " + time +
            "  " + pid +
@@ -41,5 +40,5 @@ string Log::toString() const
            "  " + level +
            "  " + tag +
            "  " + msg +
-           "  " + std::to_string(isMarked);
+           "  " + QString::number(isMarked);
 }

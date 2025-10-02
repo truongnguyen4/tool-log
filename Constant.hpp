@@ -1,7 +1,6 @@
 #ifndef CONSTANT_HPP
 #define CONSTANT_HPP
-#include <string>
-using std::string;
+#include <QString>
 class Constant final
 {
 public:
@@ -16,14 +15,14 @@ public:
             static const int COL_TAG = 6;
             static const int COL_MSG = 7;
 
-            static constexpr const char* LINE = "Line";
-            static constexpr const char* DATE = "Date";
-            static constexpr const char* TIME = "Time";
-            static constexpr const char* PID = "PID";
-            static constexpr const char* TID = "TID";
-            static constexpr const char* LEVEL = "Level";
-            static constexpr const char* TAG = "Tag";
-            static constexpr const char* MSG = "Message";
+            inline static const QString LINE = "Line";
+            inline static const QString DATE = "Date";
+            inline static const QString TIME = "Time";
+            inline static const QString PID = "PID";
+            inline static const QString TID = "TID";
+            inline static const QString LEVEL = "Level";
+            inline static const QString TAG = "Tag";
+            inline static const QString MSG = "Message";
     };
 
     class TableLogMark final {
@@ -33,10 +32,10 @@ public:
             static const int COL_TAG = 2;
             static const int COL_MSG = 3;
 
-            static constexpr const char* LINE = "Line";
-            static constexpr const char* PID = "PID";
-            static constexpr const char* TAG = "Tag";
-            static constexpr const char* MSG = "Message";
+            inline static const QString LINE = "Line";
+            inline static const QString PID = "PID";
+            inline static const QString TAG = "Tag";
+            inline static const QString MSG = "Message";
     };
 };
 #endif

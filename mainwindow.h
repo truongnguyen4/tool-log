@@ -10,8 +10,6 @@
 #include <QAtomicInteger>
 #include "ProcessHelper.hpp"
 
-using std::vector;
-
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
