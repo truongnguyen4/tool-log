@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1177</width>
-    <height>714</height>
+    <height>889</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -51,7 +51,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="device_ids"/>
+           <widget class="QComboBox" name="device_ids">
+            <property name="focusPolicy">
+             <enum>Qt::FocusPolicy::NoFocus</enum>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QLabel" name="devices">
@@ -114,6 +118,36 @@
             </item>
             <item>
              <widget class="QLineEdit" name="file">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::FocusPolicy::StrongFocus</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="focusPolicy">
+               <enum>Qt::FocusPolicy::NoFocus</enum>
+              </property>
+              <property name="text">
+               <string>Find</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="find">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -301,40 +335,89 @@
            <property name="text">
             <string>Line</string>
            </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>Date</string>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
            </property>
           </column>
           <column>
            <property name="text">
             <string>Time</string>
            </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>PID</string>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
            </property>
           </column>
           <column>
            <property name="text">
             <string>TID</string>
            </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>Level</string>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
            </property>
           </column>
           <column>
            <property name="text">
             <string>Tag</string>
            </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+             <strikeout>false</strikeout>
+            </font>
+           </property>
           </column>
           <column>
            <property name="text">
             <string>Message</string>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
            </property>
           </column>
          </widget>
@@ -382,7 +465,7 @@
      <x>0</x>
      <y>0</y>
      <width>1177</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

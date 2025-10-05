@@ -20,6 +20,7 @@ public:
     static QList<Log> filterLogsByLevel(QList<Log> logs, const QStringList level);
     static QList<Log> filterLogsByPid(QList<Log> logs, const QStringList pid);
     static QList<Log> filterLogsByLine(QList<Log> logs, const int from, const int to);
+    static QStringList splitKeywords(const QString key);
 };
 
 #endif // LOGHELPER_HPP

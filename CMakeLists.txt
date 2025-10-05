@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(Qt6_DIR "/path/to/Qt/6.9.1/gcc_64/lib/cmake/Qt6")
+# set(Qt6_DIR "/path/to/Qt/6.9.1/gcc_64/lib/cmake/Qt6")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
@@ -30,7 +30,6 @@ set(MODEL
     LogHelper.cpp
 )
 
-
 set(UTIL
     Log.hpp
     Log.cpp
@@ -41,7 +40,6 @@ set(UTIL
     SettingDialog.hpp
     SettingDialog.cpp
     HighlightDelegate.hpp
-    HighlightDelegate.cpp
 )
 
 set(PROJECT_SOURCES
@@ -58,6 +56,10 @@ set(PROJECT_SOURCES
 qt_add_executable(tool-log
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    HighlightKey.hpp
+    HighlightCell.hpp
+    HighlightKey.cpp
+    HighlightCell.cpp
 )
 
 target_link_libraries(tool-log PRIVATE Qt6::Widgets)

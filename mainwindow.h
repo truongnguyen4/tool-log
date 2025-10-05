@@ -75,6 +75,7 @@ private:
     void onSetTagHighLight();
     void onSetMsgHighLight();
     void onStart();
+    void onFind();
     void onClear();
     void onSettings();
     void onClearMark();

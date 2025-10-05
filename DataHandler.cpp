@@ -8,18 +8,21 @@ const QString DataHandler::TAG = "DataHandler";
 QList<Log> DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
     addKey(pid, tag, msg, level);
-    QStringList pids = pid.split("|", Qt::SkipEmptyParts);
-    QStringList tags = tag.split("|", Qt::SkipEmptyParts);
-    QStringList messages = msg.split("|", Qt::SkipEmptyParts);
-    QStringList levels = level.split("|", Qt::SkipEmptyParts);
-    return LogHelper::filterLogs(LogHelper::mListLogs, 1, LogHelper::mListLogs.size(), pids, tags, messages, levels);
+    return LogHelper::filterLogs(LogHelper::mListLogs,
+                                    1 /* from line*/,
+                                    LogHelper::mListLogs.size() /* to line*/,
+                                    LogHelper::splitKeywords(pid),
+                                    LogHelper::splitKeywords(tag),
+                                    LogHelper::splitKeywords(msg),
+                                    LogHelper::splitKeywords(level));
 }
 
 QList<Log> DataHandler::refreshLog(const QString &filePath)
 {
     if (!FileHelper::checkPath(filePath))
     {
-        Logger::d(TAG, "refreshLog");
+        Logger::d(TAG,
+                         "refreshLog");
         NotificationHelper::showError(MainWindow::ERROR_FILE_PATH);
         return QList<Log>();
     }
@@ -46,50 +49,47 @@ void DataHandler::addKey(const QString &pid, const QString &tag, const QString &
         {
             mListPid.push_back(pid);
             mPidId = mListPid.size() - 1;
-        } 
-        else 
+        }
+        else
         {
             // Swap exist key to the last
             mListPid.append(mListPid.takeAt(mListPid.indexOf(pid)));
         }
     }
-
     if (!tag.isEmpty())
     {
         if (!mListTag.contains(tag))
         {
             mListTag.push_back(tag);
             mTagId = mListTag.size() - 1;
-        } 
-        else 
+        }
+        else
         {
             // Swap exist key to the last
             mListTag.append(mListTag.takeAt(mListTag.indexOf(tag)));
         }
     }
-
     if (!msg.isEmpty())
     {
         if (!mListMsg.contains(msg))
         {
             mListMsg.push_back(msg);
             mMsgId = mListMsg.size() - 1;
-        } 
-        else 
+        }
+        else
         {
             // Swap exist key to the last
             mListMsg.append(mListMsg.takeAt(mListMsg.indexOf(msg)));
         }
     }
-
     if (!level.isEmpty())
     {
         if (!mListLevel.contains(level))
         {
             mListLevel.push_back(level);
             mLevelId = mListLevel.size() - 1;
-        } 
-        else 
+        }
+        else
         {
             // Swap exist key to the last
             mListLevel.append(mListLevel.takeAt(mListLevel.indexOf(level)));

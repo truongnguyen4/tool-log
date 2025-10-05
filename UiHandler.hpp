@@ -4,7 +4,8 @@
 #include "./ui_mainwindow.h"
 #include "FileHelper.hpp"
 #include "HighlightDelegate.hpp"
-
+#include "HighlightKey.hpp"
+#include "HighlightCell.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -19,25 +20,28 @@ private:
     int LINE_HEIGTH = 30;
     QColor MARK_LOG_FOREGROUND_COLOR = QColorConstants::Black;
     QColor MARK_LOG_BACKGROUND_COLOR = QColorConstants::LightGray;
-    HighlightDelegate *mTagHLDelegate = nullptr;
-    HighlightDelegate *mMsgHLDelegate = nullptr;
+    HighlightKey *mTagHLDelegate = nullptr;
+    HighlightKey *mMsgHLDelegate = nullptr;
+    HighlightCell *mLevelHLDelegate = nullptr;
+    Ui::MainWindow *mUi = nullptr;
     void setHighLightMarkRow(QTableWidget *table, int row, QBrush foregroundColor = QBrush(), QBrush backgroundColor = QBrush());
-    void initHLDelegate(Ui::MainWindow *ui);
+    void initHLDelegate();
 
 public:
-    void setTagHighLight(Ui::MainWindow *ui, const QString &tag);
-    void setMsgHighLight(Ui::MainWindow *ui, const QString &msg);
-    void loadLogs(Ui::MainWindow *ui, QList<Log> logs);
-    void updateLogShow(Ui::MainWindow *ui, QTableWidgetItem *item);
-    void markLog(Ui::MainWindow *ui, QTableWidgetItem *item = nullptr);
-    void focusLog(Ui::MainWindow *ui, QTableWidgetItem *item);
+    void highlightFindKey(const QString key);
+    void setTagHighLight(const QString &tag);
+    void setMsgHighLight(const QString &msg);
+    void loadLogs(QList<Log> logs);
+    void updateLogShow(QTableWidgetItem *item);
+    void markLog(QTableWidgetItem *item = nullptr);
+    void focusLog(QTableWidgetItem *item);
     void initUi(Ui::MainWindow *ui);
-    void updateLogVisibility(Ui::MainWindow *ui, QList<Log> &logs);
-    void clearLogcat(Ui::MainWindow *ui);
-    void setLineEdit(Ui::MainWindow *ui, QObject *obj, const QString &key);
-    void clearMarkLogs(Ui::MainWindow *ui);
-    void refreshDeviceIds(Ui::MainWindow *ui, QStringList deviceIds, const bool isConnected);
-    void startWatching(Ui::MainWindow *ui, const bool startWatch);
+    void updateLogVisibility(QList<Log> &logs);
+    void clearLogcat();
+    void setLineEdit(QObject *obj, const QString &key);
+    void clearMarkLogs();
+    void refreshDeviceIds(QStringList deviceIds, const bool isConnected);
+    void startWatching(const bool startWatch);
     template <typename... Args>
     void clearTextInput(Args &&...textBoxes)
     {

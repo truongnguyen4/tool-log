@@ -30,34 +30,34 @@ void MainWindow::onReloadTable()
     QString level = ui->level->text().trimmed();
 
     QList<Log> logs = mDataHandler.onFilterKeyChanged(pid, tag, msg, level);
-    mUiHandler.updateLogVisibility(ui, logs);
+    mUiHandler.updateLogVisibility(logs);
 }
 
 void MainWindow::onShowItem(QTableWidgetItem *item)
 {
-    mUiHandler.updateLogShow(ui, item);
+    mUiHandler.updateLogShow(item);
 }
 
 void MainWindow::onMarkItem(QTableWidgetItem *item)
 {
-    mUiHandler.markLog(ui, item);
+    mUiHandler.markLog(item);
 }
 
 void MainWindow::onFocusItem(QTableWidgetItem *item)
 {
-    mUiHandler.focusLog(ui, item);
+    mUiHandler.focusLog(item);
 }
 
 void MainWindow::onSetTagHighLight()
 {
     QString tag = ui->tag->text().trimmed();
-    mUiHandler.setTagHighLight(ui, tag);
+    mUiHandler.setTagHighLight(tag);
 }
 
 void MainWindow::onSetMsgHighLight()
 {
     QString msg = ui->msg->text().trimmed();
-    mUiHandler.setMsgHighLight(ui, msg);
+    mUiHandler.setMsgHighLight(msg);
 }
 
 void MainWindow::onRefreshLog()
@@ -69,7 +69,7 @@ void MainWindow::onRefreshLog()
     // Data logic
     QString filePath = ui->file->text().trimmed();
     QList<Log> listLogs = mDataHandler.refreshLog(filePath);
-    mUiHandler.loadLogs(ui, listLogs);
+    mUiHandler.loadLogs(listLogs);
 }
 
 void MainWindow::onStart()
@@ -91,7 +91,7 @@ void MainWindow::onStart()
     Logger::d(TAG, (isWatching ? QString("Start") : QString("Stop")) + " watching successfull");
 
     // UI logic
-    mUiHandler.startWatching(ui, isWatching);
+    mUiHandler.startWatching(isWatching);
     if (!isWatching)
     {
         onRefreshLog();
@@ -100,7 +100,7 @@ void MainWindow::onStart()
 
 void MainWindow::onClear()
 {
-    mUiHandler.clearLogcat(ui);
+    mUiHandler.clearLogcat();
     const QString deviceId = ui->device_ids->currentText().trimmed();
     int errorCode = mDataHandler.clearLogcat(deviceId);
     NotificationHelper::showError(errorCode);
@@ -114,7 +114,7 @@ void MainWindow::onSettings()
 
 void MainWindow::onClearMark()
 {
-    mUiHandler.clearMarkLogs(ui);
+    mUiHandler.clearMarkLogs();
 }
 
 void MainWindow::onDownPressed(QObject *obj)
@@ -122,7 +122,7 @@ void MainWindow::onDownPressed(QObject *obj)
     QString key = mDataHandler.nextKey(ui, obj);
     if (!key.isEmpty())
     {
-        mUiHandler.setLineEdit(ui, obj, key);
+        mUiHandler.setLineEdit(obj, key);
     }
 }
 
@@ -131,7 +131,7 @@ void MainWindow::onUpPressed(QObject *obj)
     QString key = mDataHandler.previousKey(ui, obj);
     if (!key.isEmpty())
     {
-        mUiHandler.setLineEdit(ui, obj, key);
+        mUiHandler.setLineEdit(obj, key);
     }
 }
 
@@ -167,7 +167,7 @@ void MainWindow::onDeviceIdChanged()
 
 void MainWindow::onChangeConnectDevices(QStringList deviceIds, const bool isConnected)
 {
-    mUiHandler.refreshDeviceIds(ui, deviceIds, isConnected);
+    mUiHandler.refreshDeviceIds(deviceIds, isConnected);
     onDeviceIdChanged();
 }
 
@@ -175,6 +175,12 @@ void MainWindow::onStop()
 {
     Logger::d(TAG, "Closing Application...");
     mProcessHandler.stop();
+}
+
+void MainWindow::onFind()
+{
+    QString find = ui->find->text();
+    mUiHandler.highlightFindKey(find);
 }
 
 void MainWindow::init()
@@ -197,6 +203,7 @@ void MainWindow::init()
     connect(ui->table_logs, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
     connect(ui->table_logs, &QTableWidget::itemDoubleClicked, this, &MainWindow::onMarkItem);
     connect(ui->table_logmark, &QTableWidget::itemClicked, this, &MainWindow::onFocusItem);
+    connect(ui->find, &QLineEdit::returnPressed, this, &MainWindow::onFind);
     connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onSetTagHighLight);
     connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onSetMsgHighLight);
     connect(ui->start, &QPushButton::pressed, this, &MainWindow::onStart);

@@ -8,7 +8,7 @@ using std::endl;
 
 QMap<QString, QPair<qint64, qint64>> Logger::mTimeStampMap = QMap<QString, QPair<qint64, qint64>>();
 
-bool Logger::VERBOSE = false;
+bool Logger::VERBOSE = true;
 
 void Logger::d(const QString &tag, const QString &msg)
 {

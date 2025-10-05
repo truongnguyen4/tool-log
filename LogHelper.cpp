@@ -38,12 +38,9 @@ QList<Log> LogHelper::filterLogs(QList<Log> logs, int from, int to, QStringList 
     {
         log.setHidden(false);
     }
-    Logger::d(TAG, "No filters applied, all logs are visible.");
-
 
     if (!tags.empty())
     {
-        Logger::d(TAG, "Filtering logs by tags: " + tags.join(", "));
         logs = filterLogsByTag(logs, tags);
     }
 
@@ -59,6 +56,7 @@ QList<Log> LogHelper::filterLogs(QList<Log> logs, int from, int to, QStringList 
 
     if (!levels.empty())
     {
+        Logger::d(TAG, "Filtering logs by levels: " + levels.join(", "));
         logs = filterLogsByLevel(logs, levels);
     }
 
@@ -121,7 +119,7 @@ QList<Log> LogHelper::filterLogsByLevel(QList<Log> logs, QStringList levels) {
         QString logLevel = log.getLevel();
         bool isHidden = true;
         for (const QString &level : levels) {
-            if (!logLevel.contains(level, Qt::CaseInsensitive)) {
+            if (logLevel.contains(level, Qt::CaseInsensitive)) {
                 isHidden = false;
                 break;
             }
@@ -142,12 +140,12 @@ QList<Log> LogHelper::filterLogsByPid(QList<Log> logs, QStringList pids) {
         QString logPid = log.getPid();
         bool isHidden = true;
         for (const QString &pid : pids) {
-            if (!logPid.contains(pid, Qt::CaseInsensitive)) {
+            if (logPid.contains(pid, Qt::CaseInsensitive)) {
                 isHidden = false;
                 break;
             }
         }
-        log.setHidden(true);
+        log.setHidden(isHidden);
     }
     return logs;
 }
@@ -167,3 +165,6 @@ QList<Log> LogHelper::filterLogsByLine(QList<Log> logs, int from, int to) {
     return logs;
 }
 
+QStringList LogHelper::splitKeywords(const QString key) {
+    return key.split("|", Qt::SkipEmptyParts);
+}
