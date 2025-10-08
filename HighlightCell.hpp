@@ -11,7 +11,6 @@ private:
         { QColorConstants::DarkRed, QColorConstants::White },
         { QColorConstants::Red, QColorConstants::White }
     };
-    
 public:
     HighlightCell(QObject* parent = nullptr) 
         : HighlightDelegate(parent) {}

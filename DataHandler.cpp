@@ -3,18 +3,23 @@
 #include "NotificationHelper.hpp"
 #include "LogHelper.hpp"
 #include "Logger.hpp"
+#include "Constant.hpp"
+
 const QString DataHandler::TAG = "DataHandler";
 
 QList<Log> DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
-    addKey(pid, tag, msg, level);
+    bool pidAndOperation = pid.contains(Constant::LogSplit::AND);
+    bool tagAndOperation = tag.contains(Constant::LogSplit::AND);
+    bool msgAndOperation = msg.contains(Constant::LogSplit::AND);
+    bool levelAndOperation = level.contains(Constant::LogSplit::AND);
     return LogHelper::filterLogs(LogHelper::mListLogs,
                                     1 /* from line*/,
                                     LogHelper::mListLogs.size() /* to line*/,
-                                    LogHelper::splitKeywords(pid),
-                                    LogHelper::splitKeywords(tag),
-                                    LogHelper::splitKeywords(msg),
-                                    LogHelper::splitKeywords(level));
+                                    LogHelper::splitKeywords(pid, pidAndOperation), pidAndOperation,
+                                    LogHelper::splitKeywords(tag, tagAndOperation), tagAndOperation,
+                                    LogHelper::splitKeywords(msg, msgAndOperation), msgAndOperation,
+                                    LogHelper::splitKeywords(level, levelAndOperation), levelAndOperation);
 }
 
 QList<Log> DataHandler::refreshLog(const QString &filePath)
@@ -41,6 +46,23 @@ int DataHandler::clearLogcat(const QString deviceId)
     return ProcessHelper::clearLogcat(deviceId);
 }
 
+void DataHandler::addKey(const QString &find)
+{
+
+    if (!find.isEmpty())
+    {
+        if (!mListFind.contains(find))
+        {
+            mListFind.push_back(find);
+            mFindId = mListFind.size() - 1;
+        }
+        else
+        {
+            // Swap exist key to the last
+            mListFind.append(mListFind.takeAt(mListFind.indexOf(find)));
+        }
+    }
+}
 void DataHandler::addKey(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
     if (!pid.isEmpty())
@@ -99,12 +121,20 @@ void DataHandler::addKey(const QString &pid, const QString &tag, const QString &
 
 QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
 {
+    if (obj == ui->find)
+    {
+        if (!mListFind.empty())
+        {
+            mFindId = mFindId - 1 < 0 ? 0 : mFindId - 1;
+            return mListFind.empty() ? QString() : mListFind.at(mFindId);
+        }
+    }
     if (obj == ui->pid)
     {
         if (!mListPid.empty())
         {
             mPidId = mPidId - 1 < 0 ? 0 : mPidId - 1;
-            return mListPid.at(mPidId);
+            return mListPid.empty() ? QString() : mListPid.at(mPidId);
         }
     }
     if (obj == ui->tag)
@@ -112,7 +142,7 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
         if (!mListTag.empty())
         {
             mTagId = mTagId - 1 < 0 ? 0 : mTagId - 1;
-            return mListTag.at(mTagId);
+            return mListTag.empty() ? QString() : mListTag.at(mTagId);
         }
     }
     if (obj == ui->msg)
@@ -120,7 +150,7 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
         if (!mListMsg.empty())
         {
             mMsgId = mMsgId - 1 < 0 ? 0 : mMsgId - 1;
-            return mListMsg.at(mMsgId);
+            return mListMsg.empty() ? QString() : mListMsg.at(mMsgId);
         }
     }
     if (obj == ui->level)
@@ -128,7 +158,7 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
         if (!mListLevel.empty())
         {
             mLevelId = mLevelId - 1 < 0 ? 0 : mLevelId - 1;
-            return mListLevel.at(mLevelId);
+            return mListLevel.empty() ? QString() : mListLevel.at(mLevelId);
         }
     }
     return "";
@@ -136,12 +166,20 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
 
 QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
 {
+    if (obj == ui->find)
+    {
+        if (!mListFind.empty())
+        {
+            mFindId = mFindId + 1 >= mListFind.size() ? mListFind.size() - 1 : mFindId + 1;
+            return mListFind.empty() ? QString() : mListFind.at(mFindId);
+        }
+    }
     if (obj == ui->pid)
     {
         if (!mListPid.empty())
         {
             mPidId = mPidId + 1 >= mListPid.size() ? mListPid.size() - 1 : mPidId + 1;
-            return mListPid.at(mPidId);
+            return mListPid.empty() ? QString() : mListPid.at(mPidId);
         }
     }
     if (obj == ui->tag)
@@ -149,7 +187,7 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
         if (!mListTag.empty())
         {
             mTagId = mTagId + 1 >= mListTag.size() ? mListTag.size() - 1 : mTagId + 1;
-            return mListTag.at(mTagId);
+            return mListTag.empty() ? QString() : mListTag.at(mTagId);
         }
     }
     if (obj == ui->msg)
@@ -157,7 +195,7 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
         if (!mListMsg.empty())
         {
             mMsgId = mMsgId + 1 >= mListMsg.size() ? mListMsg.size() - 1 : mMsgId + 1;
-            return mListMsg.at(mMsgId);
+            return mListMsg.empty() ? QString() : mListMsg.at(mMsgId);
         }
     }
     if (obj == ui->level)
@@ -165,7 +203,7 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
         if (!mListLevel.empty())
         {
             mLevelId = mLevelId + 1 >= mListLevel.size() ? mListLevel.size() - 1 : mLevelId + 1;
-            return mListLevel.at(mLevelId);
+            return mListLevel.empty() ? QString() : mListLevel.at(mLevelId);
         }
     }
     return "";

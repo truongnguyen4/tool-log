@@ -28,7 +28,7 @@ void MainWindow::onReloadTable()
     QString tag = ui->tag->text().trimmed();
     QString msg = ui->msg->text().trimmed();
     QString level = ui->level->text().trimmed();
-
+    mDataHandler.addKey(pid, tag, msg, level);
     QList<Log> logs = mDataHandler.onFilterKeyChanged(pid, tag, msg, level);
     mUiHandler.updateLogVisibility(logs);
 }
@@ -140,7 +140,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     auto QLineEditClass = qobject_cast<QLineEdit*>(obj);
     if (QLineEditClass && event->type() == QEvent::KeyPress) {
         QString objName = obj->objectName();
-        if (objName == ui->msg->objectName()
+        if (objName == ui->find->objectName()
+            ||objName == ui->msg->objectName()
             || objName == ui->tag->objectName()
             || objName == ui->pid->objectName()
             || objName == ui->level->objectName())
@@ -180,6 +181,7 @@ void MainWindow::onStop()
 void MainWindow::onFind()
 {
     QString find = ui->find->text();
+    mDataHandler.addKey(find);
     mUiHandler.highlightFindKey(find);
 }
 
@@ -194,6 +196,7 @@ void MainWindow::init()
     connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
     connect(ui->level, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
 
+    ui->find->installEventFilter(this);
     ui->pid->installEventFilter(this);
     ui->tag->installEventFilter(this);
     ui->msg->installEventFilter(this);

@@ -2,9 +2,9 @@
 #include <QApplication>
 #include <QStyle>
 #include "Logger.hpp"
-void HighlightKey::setKeyWords(const QStringList keys)
+
+void HighlightKey::updateKeyTotal()
 {
-    mKeys = keys;
     mKeyTotal.clear();
     if (!mKeys.empty())
     {
@@ -16,18 +16,16 @@ void HighlightKey::setKeyWords(const QStringList keys)
     }
 }
 
+void HighlightKey::setKeyWords(const QStringList keys)
+{
+    mKeys = keys;
+    updateKeyTotal();
+}
+
 void HighlightKey::setKeyFind(const QString key)
 {
     mKeyFind = key;
-    mKeyTotal.clear();
-    if (!mKeys.empty())
-    {
-        mKeyTotal.append(mKeys);
-    }
-    if (!mKeyFind.isEmpty())
-    {
-        mKeyTotal.append(mKeyFind);
-    }
+    updateKeyTotal();
 }
 
 void HighlightKey::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -94,7 +92,6 @@ void HighlightKey::paint(QPainter *painter, const QStyleOptionViewItem &option, 
 
         if (QString::compare(match, mKeyFind, Qt::CaseInsensitive) == 0)
         {
-            Logger::d("TAG", "match == mKeyFind");
             painter->fillRect(QRect(x, textRect.top(), width, textRect.height()), Qt::yellow);
             painter->setPen(Qt::red);
         }

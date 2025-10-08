@@ -28,7 +28,8 @@ void UiHandler::setTagHighLight(const QString &tag)
         Logger::e(TAG, "mTagHLDelegate is null");
         return;
     }
-    mTagHLDelegate->setKeyWords(LogHelper::splitKeywords(tag));
+    bool tagAndOperation = tag.contains(Constant::LogSplit::AND);
+    mTagHLDelegate->setKeyWords(LogHelper::splitKeywords(tag, tagAndOperation));
     mUi->table_logs->viewport()->update();
 }
 
@@ -40,7 +41,8 @@ void UiHandler::setMsgHighLight(const QString &msg)
         Logger::e(TAG, "mMsgHLDelegate is null");
         return;
     }
-    mMsgHLDelegate->setKeyWords(LogHelper::splitKeywords(msg));
+    bool msgAndOperation = msg.contains(Constant::LogSplit::AND);
+    mMsgHLDelegate->setKeyWords(LogHelper::splitKeywords(msg, msgAndOperation));
     mUi->table_logs->viewport()->update();
 }
 
@@ -104,6 +106,7 @@ void UiHandler::markLog(QTableWidgetItem *item)
         QTableWidgetItem *itemLine = new QTableWidgetItem();
         itemLine->setData(Qt::DisplayRole, log.getLine());
         mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LINE, itemLine);
+        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TIME, new QTableWidgetItem(log.getTime()));
         mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, new QTableWidgetItem(log.getPid()));
         mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, new QTableWidgetItem(log.getTag()));
         mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, new QTableWidgetItem(log.getMsg()));
@@ -162,8 +165,8 @@ void UiHandler::focusLog(QTableWidgetItem *item)
 void UiHandler::initUi(Ui::MainWindow *ui)
 {
     mUi = ui;
-    mUi->file->setText("C:\\Users\\ttnguyen4\\Downloads\\output.log");
-    // mUi->file->setText("/home/truongnguyen/Downloads/output.log");
+    // mUi->file->setText("C:\\Users\\ttnguyen4\\Downloads\\output.log");
+    mUi->file->setText("/home/truongnguyen/Downloads/output.log");
     // Table logs
     mUi->table_logs->setColumnCount(8);
     QStringList logHeaders = { Constant::TableLog::LINE,
@@ -196,8 +199,9 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     )");
 
     // Table logs mark
-    mUi->table_logmark->setColumnCount(4);
+    mUi->table_logmark->setColumnCount(5);
     QStringList markHeaders = { Constant::TableLogMark::LINE,
+                                Constant::TableLogMark::TIME,
                                 Constant::TableLogMark::PID,
                                 Constant::TableLogMark::TAG,
                                 Constant::TableLogMark::MSG };
@@ -249,6 +253,10 @@ void UiHandler::clearLogcat()
 
 void UiHandler::setLineEdit(QObject *obj, const QString &key)
 {
+    if (obj == mUi->find)
+    {
+        mUi->find->setText(key);
+    }
     if (obj == mUi->pid)
     {
         mUi->pid->setText(key);
@@ -344,7 +352,6 @@ void UiHandler::initHLDelegate()
         mTagHLDelegate = HighlightKey::Builder(mUi->table_logs)
                                         .setBold(true)
                                         .build();
-        mTagHLDelegate->setKeyWords(QStringList());
         mUi->table_logs->setItemDelegateForColumn(Constant::TableLog::COL_TAG, mTagHLDelegate);
     }
     if (mMsgHLDelegate == nullptr)
@@ -352,7 +359,6 @@ void UiHandler::initHLDelegate()
         mMsgHLDelegate = HighlightKey::Builder(mUi->table_logs)
                                         .setBold(true)
                                         .build();
-        mMsgHLDelegate->setKeyWords(QStringList());
         mUi->table_logs->setItemDelegateForColumn(Constant::TableLog::COL_MSG, mMsgHLDelegate);
     }
     if (mLevelHLDelegate == nullptr)
@@ -360,7 +366,11 @@ void UiHandler::initHLDelegate()
         mLevelHLDelegate = HighlightCell::Builder(mUi->table_logs)
                                         .setBold(true)
                                         .build();
-        mLevelHLDelegate->setKeyWords(QStringList() << "V" << "D" << "I" << "W" << "E");
+        mLevelHLDelegate->setKeyWords({Constant::LogLevel::V,
+                                        Constant::LogLevel::D,
+                                        Constant::LogLevel::I,
+                                        Constant::LogLevel::W,
+                                        Constant::LogLevel::E});
         mUi->table_logs->setItemDelegateForColumn(Constant::TableLog::COL_LEVEL, mLevelHLDelegate);
     }
 }

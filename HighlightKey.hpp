@@ -4,6 +4,8 @@
 class HighlightKey : public HighlightDelegate
 {
 private:
+    // Pair color Text - Background
+    // TODO: Implement to use backgroud color
     QList<QPair<QColor, QColor>> mColors = {
         { QColorConstants::DarkGreen, QColorConstants::White },
         { QColorConstants::DarkRed, QColorConstants::White },
@@ -19,7 +21,7 @@ private:
     };
     QStringList mKeyTotal = QStringList();
     QString mKeyFind = "";
-
+    void updateKeyTotal();
 public:
     HighlightKey(QObject* parent = nullptr) : HighlightDelegate(parent) {}
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
