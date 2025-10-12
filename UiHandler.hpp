@@ -2,10 +2,10 @@
 #define UIHANDLER_HPP
 #include "Log.hpp"
 #include "./ui_mainwindow.h"
-#include "FileHelper.hpp"
-#include "HighlightDelegate.hpp"
 #include "HighlightKey.hpp"
 #include "HighlightCell.hpp"
+#include "Setting.hpp"
+#include "Property.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -42,6 +42,7 @@ public:
     void clearMarkLogs();
     void refreshDeviceIds(QStringList deviceIds, const bool isConnected);
     void startWatching(const bool startWatch);
+    void refreshSettingProperty(const QList<Setting> settings, const QList<Property> properties);
     template <typename... Args>
     void clearTextInput(Args &&...textBoxes)
     {

@@ -162,6 +162,29 @@ void UiHandler::focusLog(QTableWidgetItem *item)
     mUi->table_logs->setCurrentCell(targetRow, Constant::TableLog::COL_LEVEL);
 }
 
+void UiHandler::refreshSettingProperty(const QList<Setting> settings, const QList<Property> properties)
+{
+    mUi->table_setting->setUpdatesEnabled(false);
+    for (const Setting &setting : settings)
+    {
+        const int row = mUi->table_setting->rowCount();
+        mUi->table_setting->insertRow(row);
+        mUi->table_setting->setItem(row, Constant::TableSetting::COL_SETTING, new QTableWidgetItem(setting.getName()));
+        mUi->table_setting->setItem(row, Constant::TableSetting::COL_VALUE, new QTableWidgetItem(setting.getValue()));
+    }
+    mUi->table_setting->setUpdatesEnabled(true);
+
+    mUi->table_property->setUpdatesEnabled(false);
+    for (const Property &property : properties)
+    {
+        const int row = mUi->table_property->rowCount();
+        mUi->table_property->insertRow(row);
+        mUi->table_property->setItem(row, Constant::TableProperty::COL_PROPERTY, new QTableWidgetItem(property.getName()));
+        mUi->table_property->setItem(row, Constant::TableProperty::COL_VALUE, new QTableWidgetItem(property.getValue()));
+    }
+    mUi->table_property->setUpdatesEnabled(true);
+}
+
 void UiHandler::initUi(Ui::MainWindow *ui)
 {
     mUi = ui;

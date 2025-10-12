@@ -6,6 +6,9 @@
 #include "NotificationHelper.hpp"
 #include <QDateTime>
 #include "Logger.hpp"
+#include "Property.hpp"
+#include "Setting.hpp"
+#include <algorithm>
 
 QString const MainWindow::TAG = "MainWindow";
 QStringList MainWindow::simulateDevices = {};
@@ -184,6 +187,15 @@ void MainWindow::onFind()
     mDataHandler.addKey(find);
     mUiHandler.highlightFindKey(find);
 }
+void MainWindow::onRefreshSettingProperty()
+{
+    QList<Setting> settings = mPropertyHandler.loadSettings();
+    std::sort(settings.begin(), settings.end(), [](const Setting &s1, const Setting &s2) {
+        return s1.getGroup() < s2.getGroup();
+    });
+    QList<Property> properties = mPropertyHandler.loadProperties();
+    mUiHandler.refreshSettingProperty(settings, properties);
+}
 
 void MainWindow::init()
 {
@@ -195,6 +207,8 @@ void MainWindow::init()
     connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
     connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
     connect(ui->level, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
+
+    connect(ui->refresh, &QPushButton::pressed, this, &MainWindow::onRefreshSettingProperty);
 
     ui->find->installEventFilter(this);
     ui->pid->installEventFilter(this);

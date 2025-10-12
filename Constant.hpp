@@ -4,6 +4,33 @@
 class Constant final
 {
 public:
+    class TableSetting final {
+        public:
+            static const int COL_SETTING = 0;
+            static const int COL_VALUE = 1;
+            static const int COL_SEND = 2;
+
+            inline static const QString SETTING = "Setting";
+            inline static const QString VALUE = "value";
+    };
+
+    class TableProperty final {
+    public:
+        static const int COL_PROPERTY = 0;
+        static const int COL_VALUE = 1;
+        static const int COL_SEND = 2;
+
+        inline static const QString PROPERTY = "Property";
+        inline static const QString VALUE = "value";
+    };
+
+    class PropertyGroup final {
+        public:
+            inline static const QString Global = "Global";
+            inline static const QString System = "System";
+            inline static const QString Secure = "Secure";
+    };
+    
     class LogSplit final {
         public:
             inline static const QString OR = "|";

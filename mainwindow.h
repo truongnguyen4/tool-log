@@ -9,6 +9,7 @@
 #include "SettingDialog.hpp"
 #include <QAtomicInteger>
 #include "ProcessHelper.hpp"
+#include "PropertyHandler.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,6 +39,7 @@ private:
     SettingDialog mSettingDialog;
     NotificationDialog mNotificationDialog;
     ProcessHelper mProcessHandler;
+    PropertyHandler mPropertyHandler;
     // int count = 0;
     class MainWindowDeviceChangeListener : public ProcessHelper::DeviceChangeListener
     {
@@ -82,6 +84,8 @@ private:
     void onDownPressed(QObject *obj);
     void onUpPressed(QObject *obj);
     void onDeviceIdChanged();
+
+    void onRefreshSettingProperty();
     bool eventFilter(QObject *obj, QEvent *event);
 
 signals:

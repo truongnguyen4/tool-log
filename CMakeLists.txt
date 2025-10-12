@@ -17,6 +17,8 @@ set(CONTROLLER
     UiHandler.cpp
     DataHandler.hpp
     DataHandler.cpp
+    PropertyHandler.hpp
+    PropertyHandler.cpp
 )
 
 set(MODEL
@@ -28,6 +30,10 @@ set(MODEL
     NotificationHelper.cpp
     LogHelper.hpp
     LogHelper.cpp
+    HighlightKey.hpp
+    HighlightCell.hpp
+    HighlightKey.cpp
+    HighlightCell.cpp
 )
 
 set(UTIL
@@ -40,6 +46,10 @@ set(UTIL
     SettingDialog.hpp
     SettingDialog.cpp
     HighlightDelegate.hpp
+    Setting.hpp
+    Setting.cpp
+    Property.hpp
+    Property.cpp
 )
 
 set(PROJECT_SOURCES
@@ -56,10 +66,6 @@ set(PROJECT_SOURCES
 qt_add_executable(tool-log
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
-    HighlightKey.hpp
-    HighlightCell.hpp
-    HighlightKey.cpp
-    HighlightCell.cpp
 )
 
 target_link_libraries(tool-log PRIVATE Qt6::Widgets)
