@@ -3,15 +3,19 @@
 #include "Logger.hpp"
 #include "mainwindow.h"
 #include <QThread>
+#include "NotificationHelper.hpp"
 
 QString const ProcessHelper::TAG = "ProcessHelper";
-QProcess* ProcessHelper::processReadLogCat = new QProcess();
+QProcess *ProcessHelper::processReadLogCat = new QProcess();
 
-void ProcessHelper::registerDeviceChangeListener(DeviceChangeListener* listener) {
-    if (listener == nullptr) {
+void ProcessHelper::registerDeviceChangeListener(DeviceChangeListener *listener)
+{
+    if (listener == nullptr)
+    {
         return;
     }
-    if (!mDeviceChangeListeners.contains(listener)) {
+    if (!mDeviceChangeListeners.contains(listener))
+    {
         Logger::d(TAG, "Register new device change listener");
         mDeviceChangeListeners.append(listener);
 
@@ -22,18 +26,21 @@ void ProcessHelper::registerDeviceChangeListener(DeviceChangeListener* listener)
     }
 }
 
-void ProcessHelper::unregisterDeviceChangeListener(DeviceChangeListener* listener) {
+void ProcessHelper::unregisterDeviceChangeListener(DeviceChangeListener *listener)
+{
     Logger::d(TAG, "Unregister device change listener");
     mDeviceChangeListeners.removeAll(listener);
 }
 
-QString ProcessHelper::runShellCommand(const QString &program, const QStringList &args)
+QString ProcessHelper::runShellCommand(const QString program, const QStringList args, int &exitCode)
 {
     QProcess *process = new QProcess();
     process->start(program, args);
     process->waitForFinished();
 
     QString output = process->readAllStandardOutput();
+    exitCode = process->exitCode();
+
     delete process;
 
     return output;
@@ -42,11 +49,16 @@ QString ProcessHelper::runShellCommand(const QString &program, const QStringList
 QStringList ProcessHelper::getDeviceIds()
 {
     QStringList deviceIds;
-    QString output = runShellCommand("adb", QStringList() << "devices");
+    int exitCode = 0;
+    QString output = runShellCommand("adb", QStringList() << "devices", exitCode);
+    if (exitCode != 0)
+    {
+        NotificationHelper::showExitCode();
+    }
     QStringList lines = output.split('\n', Qt::SkipEmptyParts);
     if (lines.length() > 1)
     {
-        for (int i=1; i<lines.length(); i++)
+        for (int i = 1; i < lines.length(); i++)
         {
             const QString deviceId = lines[i].split('\t')[0].trimmed();
             if (!deviceId.isEmpty())
@@ -67,7 +79,14 @@ int ProcessHelper::clearLogcat(const QString deviceId)
         return MainWindow::ERROR_DEVICE_ID;
     }
     Logger::d(TAG, "Clear logcat on DEVICE ID = " + deviceId);
-    runShellCommand("adb", QStringList() << "-s" << deviceId << "logcat" << "-c");
+    QStringList command = {"-s", deviceId, "logcat", "-c"};
+    int exitCode = 0;
+    runShellCommand("adb", command, exitCode);
+    if (exitCode != 0)
+    {
+        NotificationHelper::showExitCode();
+        return MainWindow::ERROR_DEVICE_ID;
+    }
     return MainWindow::SUCCESS;
 }
 
@@ -103,9 +122,8 @@ int ProcessHelper::startWatchLog(const QString filePath, const QString deviceId)
 
 ProcessHelper::ProcessHelper()
 {
-    mThreadDetectDevices = QThread::create([=]() {
-        detectDevices();
-    });
+    mThreadDetectDevices = QThread::create([=]()
+                                           { detectDevices(); });
 
     if (mThreadDetectDevices != nullptr)
     {
@@ -136,26 +154,37 @@ void ProcessHelper::detectDevices()
         {
             continue;
         }
-        if (newDeviceIds.size() > mCurrentDeviceIds.size()) {
-            QStringList addedDevices = newDeviceIds;
-            for (const QString& device : mCurrentDeviceIds) {
-                addedDevices.removeAll(device);
-            }
-            Logger::d(TAG, "Device connected: " + addedDevices.join(", "));
 
-            for (DeviceChangeListener *listener : mDeviceChangeListeners) {
+        QStringList addedDevices;
+        for (const QString &device : newDeviceIds)
+        {
+            if (!mCurrentDeviceIds.contains(device))
+            {
+                addedDevices.append(device);
+            }
+        }
+        if (!addedDevices.isEmpty())
+        {
+            Logger::d(TAG, "Device connected: " + addedDevices.join(", "));
+            for (DeviceChangeListener *listener : mDeviceChangeListeners)
+            {
                 listener->onDevicesIsConnected(addedDevices);
             }
         }
 
-        if (newDeviceIds.size() < mCurrentDeviceIds.size()) {
-            QStringList removedDevices = mCurrentDeviceIds;
-            for (const QString& device : newDeviceIds) {
-                removedDevices.removeAll(device);
+        QStringList removedDevices;
+        for (const QString &device : mCurrentDeviceIds)
+        {
+            if (!newDeviceIds.contains(device))
+            {
+                removedDevices.append(device);
             }
+        }
+        if (!removedDevices.isEmpty())
+        {
             Logger::d(TAG, "Device disconnected: " + removedDevices.join(", "));
-
-            for (DeviceChangeListener *listener : mDeviceChangeListeners) {
+            for (DeviceChangeListener *listener : mDeviceChangeListeners)
+            {
                 listener->onDevicesIsDisconnected(removedDevices);
             }
         }

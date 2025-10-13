@@ -6,12 +6,14 @@ class Constant final
 public:
     class TableSetting final {
         public:
-            static const int COL_SETTING = 0;
-            static const int COL_VALUE = 1;
-            static const int COL_SEND = 2;
+            static const int COL_GROUP = 0;
+            static const int COL_SETTING = 1;
+            static const int COL_VALUE = 2;
+            static const int COL_SEND = 3;
 
+            inline static const QString GROUP = "Group";
             inline static const QString SETTING = "Setting";
-            inline static const QString VALUE = "value";
+            inline static const QString VALUE = "Value";
     };
 
     class TableProperty final {
@@ -24,14 +26,14 @@ public:
         inline static const QString VALUE = "value";
     };
 
-    class PropertyGroup final {
+    class SettingGroup final {
         public:
             inline static const QString Global = "Global";
             inline static const QString System = "System";
             inline static const QString Secure = "Secure";
     };
     
-    class LogSplit final {
+    class Split final {
         public:
             inline static const QString OR = "|";
             inline static const QString AND = "&";

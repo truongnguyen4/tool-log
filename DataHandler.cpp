@@ -4,30 +4,28 @@
 #include "LogHelper.hpp"
 #include "Logger.hpp"
 #include "Constant.hpp"
+#include "PropertyHelper.hpp"
+#include "SettingHelper.hpp"
+#include "UtilHelper.hpp"
 
 const QString DataHandler::TAG = "DataHandler";
 
-QList<Log> DataHandler::onFilterKeyChanged(const QString &pid, const QString &tag, const QString &msg, const QString &level)
+QList<Log> DataHandler::filterLogs(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
-    bool pidAndOperation = pid.contains(Constant::LogSplit::AND);
-    bool tagAndOperation = tag.contains(Constant::LogSplit::AND);
-    bool msgAndOperation = msg.contains(Constant::LogSplit::AND);
-    bool levelAndOperation = level.contains(Constant::LogSplit::AND);
     return LogHelper::filterLogs(LogHelper::mListLogs,
                                     1 /* from line*/,
                                     LogHelper::mListLogs.size() /* to line*/,
-                                    LogHelper::splitKeywords(pid, pidAndOperation), pidAndOperation,
-                                    LogHelper::splitKeywords(tag, tagAndOperation), tagAndOperation,
-                                    LogHelper::splitKeywords(msg, msgAndOperation), msgAndOperation,
-                                    LogHelper::splitKeywords(level, levelAndOperation), levelAndOperation);
+                                    UtilHelper::splitKeywords(pid), pid.contains(Constant::Split::AND),
+                                    UtilHelper::splitKeywords(tag), tag.contains(Constant::Split::AND),
+                                    UtilHelper::splitKeywords(msg), msg.contains(Constant::Split::AND),
+                                    UtilHelper::splitKeywords(level), level.contains(Constant::Split::AND));
 }
 
 QList<Log> DataHandler::refreshLog(const QString &filePath)
 {
     if (!FileHelper::checkPath(filePath))
     {
-        Logger::d(TAG,
-                         "refreshLog");
+        Logger::d(TAG, "refreshLog");
         NotificationHelper::showError(MainWindow::ERROR_FILE_PATH);
         return QList<Log>();
     }
@@ -48,7 +46,6 @@ int DataHandler::clearLogcat(const QString deviceId)
 
 void DataHandler::addKey(const QString &find)
 {
-
     if (!find.isEmpty())
     {
         if (!mListFind.contains(find))
@@ -63,6 +60,27 @@ void DataHandler::addKey(const QString &find)
         }
     }
 }
+
+void DataHandler::addKey(const QString &property, const QString &setting)
+{
+    if (!property.isEmpty())
+    {
+        if (!mListProperty.contains(property))
+        {
+            Logger::d(TAG, "Add property key: " + property);
+            mListProperty.push_back(property);
+        }
+    }
+    if (!setting.isEmpty())
+    {
+        if (!mListSetting.contains(setting))
+        {
+            Logger::d(TAG, "Add setting key: " + setting);
+            mListSetting.push_back(setting);
+        }
+    }
+}
+
 void DataHandler::addKey(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
     if (!pid.isEmpty())
@@ -161,6 +179,24 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
             return mListLevel.empty() ? QString() : mListLevel.at(mLevelId);
         }
     }
+    if (obj == ui->property_filter)
+    {
+        if (!mListProperty.empty())
+        {
+            Logger::d(TAG, "Previous property key: " + mListProperty.at(mPropertyId));
+            mPropertyId = mPropertyId - 1 < 0 ? 0 : mPropertyId - 1;
+            return mListProperty.empty() ? QString() : mListProperty.at(mPropertyId);
+        }
+    }
+    if (obj == ui->setting_filter)
+    {
+        if (!mListSetting.empty())
+        {
+            mSettingId = mSettingId - 1 < 0 ? 0 : mSettingId - 1;
+            Logger::d(TAG, "Previous setting key: " + mListSetting.at(mSettingId));
+            return mListSetting.empty() ? QString() : mListSetting.at(mSettingId);
+        }
+    }
     return "";
 }
 
@@ -206,5 +242,45 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
             return mListLevel.empty() ? QString() : mListLevel.at(mLevelId);
         }
     }
+    if (obj == ui->property_filter)
+    {
+        if (!mListProperty.empty())
+        {
+            mPropertyId = mPropertyId + 1 >= mListProperty.size() ? mListProperty.size() - 1 : mPropertyId + 1;
+            return mListProperty.empty() ? QString() : mListProperty.at(mPropertyId);
+        }
+    }
+    if (obj == ui->setting_filter)
+    {
+        if (!mListSetting.empty())
+        {
+            mSettingId = mSettingId + 1 >= mListSetting.size() ? mListSetting.size() - 1 : mSettingId + 1;
+            return mListSetting.empty() ? QString() : mListSetting.at(mSettingId);
+        }
+    }
     return "";
+}
+
+QList<Property> DataHandler::loadProperties(const QString deviceId)
+{
+    PropertyHelper::loadProperties(deviceId);
+    return PropertyHelper::mProperties;
+}
+
+QList<Setting> DataHandler::loadSettings(const QString deviceId)
+{
+    SettingHelper::loadSettings(deviceId);
+    return SettingHelper::mSettings;
+}
+
+QList<Setting> DataHandler::filterSettings(const QString nameFilter)
+{
+    const QStringList names = UtilHelper::splitKeywords(nameFilter);
+    return SettingHelper::filterSettings(SettingHelper::mSettings, names);
+}
+
+QList<Property> DataHandler::filterProperties(const QString nameFilter)
+{
+    QStringList names = UtilHelper::splitKeywords(nameFilter);
+    return PropertyHelper::filterProperty(PropertyHelper::mProperties, names);
 }

@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/save.png</file>
+        <file>icons/play.png</file>
+        <file>icons/stop.png</file>
+        <file>icons/clear.png</file>
+        <file>icons/setting.png</file>
+        <file>icons/refresh.png</file>
+        <file>icons/find.png</file>
+        <file>icons/folder.png</file>
+        <file>icons/device.png</file>
+        <file>icons/remove-bookmark.png</file>
+    </qresource>
+</RCC>

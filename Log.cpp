@@ -2,8 +2,6 @@
 
 int Log::static_id = 1;
 
-Log::Log() : line(static_id++) {}
-
 const int &Log::getLine() const { return line; }
 
 const QString &Log::getDate() const { return date; }

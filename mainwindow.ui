@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1217</width>
-    <height>790</height>
+    <width>1027</width>
+    <height>740</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,479 +20,532 @@
    <string>ToolLog</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>1</number>
-      </property>
-      <widget class="QWidget" name="pg_adb">
-       <attribute name="title">
-        <string>adb</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_12">
         <item>
-         <widget class="QSplitter" name="splitter">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
+         <widget class="QComboBox" name="device_ids">
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::NoFocus</enum>
           </property>
-          <widget class="QWidget" name="verticalLayoutWidget">
-           <property name="focusPolicy">
-            <enum>Qt::FocusPolicy::NoFocus</enum>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,1,1">
-            <property name="sizeConstraint">
-             <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
-            </property>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_8">
-              <item>
-               <widget class="QPushButton" name="start">
-                <property name="focusPolicy">
-                 <enum>Qt::FocusPolicy::NoFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Start</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="clear">
-                <property name="focusPolicy">
-                 <enum>Qt::FocusPolicy::NoFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Clear</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="device_ids">
-                <property name="focusPolicy">
-                 <enum>Qt::FocusPolicy::NoFocus</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="devices">
-                <property name="text">
-                 <string>(0)</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer">
-                <property name="focusPolicy">
-                 <enum>Qt::FocusPolicy::NoFocus</enum>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btn_clear_mark">
-                <property name="focusPolicy">
-                 <enum>Qt::FocusPolicy::NoFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Clear BookMark</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="setting">
-                <property name="focusPolicy">
-                 <enum>Qt::FocusPolicy::NoFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Settings</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="layout_filter">
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout">
-                <item>
-                 <widget class="QLabel" name="label">
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::NoFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>File</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="file">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::StrongFocus</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
-                <item>
-                 <widget class="QLabel" name="label_6">
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::NoFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>Find</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="find">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::StrongFocus</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_4">
-                <item>
-                 <widget class="QLabel" name="label_4">
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::NoFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>Msg</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="msg">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::StrongFocus</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_3">
-                <item>
-                 <widget class="QLabel" name="label_3">
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::NoFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>Tag</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="tag">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::StrongFocus</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_5">
-                <item>
-                 <widget class="QLabel" name="label_2">
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::NoFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>PID</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="pid">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::StrongFocus</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                 <widget class="QLabel" name="label_5">
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::NoFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>Level</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="level">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="focusPolicy">
-                   <enum>Qt::FocusPolicy::StrongFocus</enum>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QTextEdit" name="log">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::FocusPolicy::ClickFocus</enum>
-              </property>
-              <property name="lineWidth">
-               <number>3</number>
-              </property>
-              <property name="lineWrapMode">
-               <enum>QTextEdit::LineWrapMode::WidgetWidth</enum>
-              </property>
-              <property name="lineWrapColumnOrWidth">
-               <number>3</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTableWidget" name="table_logs">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="palette">
-               <palette>
-                <active>
-                 <colorrole role="Highlight">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>255</red>
-                    <green>255</green>
-                    <blue>255</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </active>
-                <inactive>
-                 <colorrole role="Highlight">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>255</red>
-                    <green>255</green>
-                    <blue>255</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </inactive>
-                <disabled/>
-               </palette>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::FocusPolicy::NoFocus</enum>
-              </property>
-              <column>
-               <property name="text">
-                <string>Line</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                </font>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Date</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                </font>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Time</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                </font>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>PID</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                </font>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>TID</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                </font>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Level</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                </font>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Tag</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                 <strikeout>false</strikeout>
-                </font>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Message</string>
-               </property>
-               <property name="font">
-                <font>
-                 <bold>true</bold>
-                 <underline>true</underline>
-                </font>
-               </property>
-              </column>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QTableWidget" name="table_logmark">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="focusPolicy">
-            <enum>Qt::FocusPolicy::NoFocus</enum>
-           </property>
-           <column>
-            <property name="text">
-             <string>Line</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Time</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>PID</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Tag</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Message</string>
-            </property>
-           </column>
-          </widget>
          </widget>
         </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="pg_property">
-       <attribute name="title">
-        <string>property</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="resource.qrc">:/icons/device.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="devices">
+          <property name="text">
+           <string>(0)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="pg_adb">
+         <attribute name="title">
+          <string>adb</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QSplitter" name="splitter">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <widget class="QWidget" name="verticalLayoutWidget">
+             <property name="focusPolicy">
+              <enum>Qt::FocusPolicy::NoFocus</enum>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,1,1">
+              <property name="sizeConstraint">
+               <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+              </property>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_8">
+                <item>
+                 <widget class="QPushButton" name="start">
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resource.qrc">
+                    <normaloff>:/icons/play.png</normaloff>:/icons/play.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="clear">
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resource.qrc">
+                    <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btn_clear_mark">
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resource.qrc">
+                    <normaloff>:/icons/remove-bookmark.png</normaloff>:/icons/remove-bookmark.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="setting">
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resource.qrc">
+                    <normaloff>:/icons/setting.png</normaloff>:/icons/setting.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="layout_filter">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout">
+                  <item>
+                   <widget class="QLabel" name="label">
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="resource.qrc">:/icons/folder.png</pixmap>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="file">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::StrongFocus</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <item>
+                   <widget class="QLabel" name="label_6">
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="resource.qrc">:/icons/find.png</pixmap>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="find">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::StrongFocus</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_4">
+                  <item>
+                   <widget class="QLabel" name="label_4">
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
+                    </property>
+                    <property name="text">
+                     <string>Msg</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="msg">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::StrongFocus</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_3">
+                  <item>
+                   <widget class="QLabel" name="label_3">
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
+                    </property>
+                    <property name="text">
+                     <string>Tag</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="tag">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::StrongFocus</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_5">
+                  <item>
+                   <widget class="QLabel" name="label_2">
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
+                    </property>
+                    <property name="text">
+                     <string>PID</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="pid">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::StrongFocus</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_2">
+                  <item>
+                   <widget class="QLabel" name="label_5">
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
+                    </property>
+                    <property name="text">
+                     <string>Level</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="level">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::FocusPolicy::StrongFocus</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QTextEdit" name="log">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::ClickFocus</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>3</number>
+                </property>
+                <property name="lineWrapMode">
+                 <enum>QTextEdit::LineWrapMode::WidgetWidth</enum>
+                </property>
+                <property name="lineWrapColumnOrWidth">
+                 <number>3</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTableWidget" name="table_logs">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="palette">
+                 <palette>
+                  <active>
+                   <colorrole role="Highlight">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                  </active>
+                  <inactive>
+                   <colorrole role="Highlight">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>255</red>
+                      <green>255</green>
+                      <blue>255</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                  </inactive>
+                  <disabled/>
+                 </palette>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::NoFocus</enum>
+                </property>
+                <column>
+                 <property name="text">
+                  <string>Line</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                  </font>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Date</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                  </font>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Time</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                  </font>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>PID</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                  </font>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>TID</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                  </font>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Level</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                  </font>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Tag</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                   <strikeout>false</strikeout>
+                  </font>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Message</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                   <underline>true</underline>
+                  </font>
+                 </property>
+                </column>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QTableWidget" name="table_logmark">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::FocusPolicy::NoFocus</enum>
+             </property>
+             <column>
+              <property name="text">
+               <string>Line</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Time</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>PID</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Tag</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Message</string>
+              </property>
+             </column>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pg_property">
+         <attribute name="title">
+          <string>property</string>
+         </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
              <widget class="QPushButton" name="refresh">
               <property name="text">
-               <string>Refresh</string>
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="resource.qrc">
+                <normaloff>:/icons/refresh.png</normaloff>:/icons/refresh.png</iconset>
               </property>
              </widget>
             </item>
@@ -512,28 +565,31 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QTableWidget" name="table_property">
-              <column>
-               <property name="text">
-                <string>Property</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Value</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Send</string>
-               </property>
-              </column>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="resource.qrc">:/icons/find.png</pixmap>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="setting_filter"/>
+              </item>
+             </layout>
             </item>
             <item>
              <widget class="QTableWidget" name="table_setting">
+              <column>
+               <property name="text">
+                <string>Group</string>
+               </property>
+              </column>
               <column>
                <property name="text">
                 <string>Setting</string>
@@ -553,26 +609,58 @@
             </item>
            </layout>
           </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <widget class="QLabel" name="label_8">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="resource.qrc">:/icons/find.png</pixmap>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="property_filter"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="table_property">
+              <column>
+               <property name="text">
+                <string>Property</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Value</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Send</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
-        </item>
-       </layout>
-      </widget>
-     </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1217</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -17,8 +17,6 @@ set(CONTROLLER
     UiHandler.cpp
     DataHandler.hpp
     DataHandler.cpp
-    PropertyHandler.hpp
-    PropertyHandler.cpp
 )
 
 set(MODEL
@@ -27,29 +25,27 @@ set(MODEL
     ProcessHelper.hpp
     ProcessHelper.cpp
     NotificationHelper.hpp
-    NotificationHelper.cpp
     LogHelper.hpp
     LogHelper.cpp
     HighlightKey.hpp
     HighlightCell.hpp
-    HighlightKey.cpp
-    HighlightCell.cpp
+    HighlightDelegate.hpp
+    PropertyHelper.hpp
+    PropertyHelper.cpp
+    SettingHelper.hpp
+    SettingHelper.cpp
 )
 
 set(UTIL
     Log.hpp
     Log.cpp
     Logger.hpp
-    Logger.cpp
     NotificationDialog.hpp
     NotificationDialog.cpp
     SettingDialog.hpp
     SettingDialog.cpp
-    HighlightDelegate.hpp
     Setting.hpp
-    Setting.cpp
     Property.hpp
-    Property.cpp
 )
 
 set(PROJECT_SOURCES
@@ -66,6 +62,10 @@ set(PROJECT_SOURCES
 qt_add_executable(tool-log
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    QPushButtonDefault.h
+    QLineEditDefault.h
+    resource.qrc
+    UtilHelper.hpp
 )
 
 target_link_libraries(tool-log PRIVATE Qt6::Widgets)

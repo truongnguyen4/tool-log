@@ -4,16 +4,44 @@
 class Property
 {
 private:
-    QString name;
-    QString value;
+int line = 0;
+    QString name = "default";
+    QString value = "default";
+    bool isHidden = false;
 public:
-    Property(/* args */);
-    void setName(const QString name);
-    void setValue(const QString value);
-    QString getName() const;
-    QString getValue() const;
+    Property() : line(++static_line) {};
+    Property(QString name, QString value) : name(name), value(value), line(++static_line) {};
+    inline static int static_line = 0;
+    void setName(const QString name)
+    {
+        this->name = name;
+    }
+    void setValue(const QString value)
+    {
+        this->value = value;
+    }
+    QString getName() const
+    {
+        return name;
+    }
+    QString getValue() const
+    {
+        return value;
+    }
+    bool getIsHidden() const
+    {
+        return isHidden;
+    }
+    void setIsHidden(const bool isHidden)
+    {
+        this->isHidden = isHidden;
+    }
+    int getLine() const
+    {
+        return line;
+    }
     QString toString() {
-        return "name: " + name + ", value: " + value;
+        return "line: " + QString::number(getLine()) + ", name: " + name + ", value: " + value + ", isHidden: " + QString::number(isHidden);
     }
 };
 

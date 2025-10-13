@@ -24,9 +24,6 @@ public:
     static QList<Log> filterLogsByLevel(QList<Log> logs, const QStringList level, const bool andOperate);
     static QList<Log> filterLogsByPid(QList<Log> logs, const QStringList pid, const bool andOperate);
     static QList<Log> filterLogsByLine(QList<Log> logs, const int from, const int to);
-    static QStringList splitKeywords(const QString key, const bool andOperation);
-    static QStringList splitKeywordsByOr(const QString key);
-    static QStringList splitKeywordsByAnd(const QString key);
 };
 
 #endif // LOGHELPER_HPP

@@ -8,7 +8,7 @@
 class ProcessHelper {
 public:
     ProcessHelper();
-    static QString runShellCommand(const QString &program, const QStringList &command_args);
+    static QString runShellCommand(const QString program, const QStringList command_args, int& exitCode);
     static QStringList getDeviceIds();
     static int clearLogcat(const QString deviceId);
     static int startWatchLog(const QString filePath, const QString deviceId);

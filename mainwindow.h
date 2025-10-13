@@ -9,7 +9,6 @@
 #include "SettingDialog.hpp"
 #include <QAtomicInteger>
 #include "ProcessHelper.hpp"
-#include "PropertyHandler.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,7 +30,6 @@ public:
     static QStringList simulateDevices;
 
 private:
-
     static const QString TAG;
     Ui::MainWindow *ui;
     UiHandler mUiHandler;
@@ -39,8 +37,7 @@ private:
     SettingDialog mSettingDialog;
     NotificationDialog mNotificationDialog;
     ProcessHelper mProcessHandler;
-    PropertyHandler mPropertyHandler;
-    // int count = 0;
+
     class MainWindowDeviceChangeListener : public ProcessHelper::DeviceChangeListener
     {
     public:
@@ -69,7 +66,7 @@ private:
     void onRefreshDeviceIds();
     void onChangeConnectDevices(QStringList deviceIds, const bool isConnected);
 
-    void onReloadTable();
+    void onFilterLog();
     void onShowItem(QTableWidgetItem *item);
     void onMarkItem(QTableWidgetItem *item);
     void onFocusItem(QTableWidgetItem *item);
@@ -85,6 +82,8 @@ private:
     void onUpPressed(QObject *obj);
     void onDeviceIdChanged();
 
+    void onFilterProperties();
+    void onFilterSettings();
     void onRefreshSettingProperty();
     bool eventFilter(QObject *obj, QEvent *event);
 

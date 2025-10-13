@@ -28,36 +28,27 @@ private:
     void initHLDelegate();
 
 public:
-    void highlightFindKey(const QString key);
+    bool isFirstLoadSettings = false;
+    bool isFirstLoadProperties = false;
+    void setFindHighlight(const QString key);
     void setTagHighLight(const QString &tag);
     void setMsgHighLight(const QString &msg);
     void loadLogs(QList<Log> logs);
+    void updateLogVisibility(QList<Log> &logs);
     void updateLogShow(QTableWidgetItem *item);
     void markLog(QTableWidgetItem *item = nullptr);
     void focusLog(QTableWidgetItem *item);
     void initUi(Ui::MainWindow *ui);
-    void updateLogVisibility(QList<Log> &logs);
     void clearLogcat();
-    void setLineEdit(QObject *obj, const QString &key);
     void clearMarkLogs();
     void refreshDeviceIds(QStringList deviceIds, const bool isConnected);
     void startWatching(const bool startWatch);
-    void refreshSettingProperty(const QList<Setting> settings, const QList<Property> properties);
-    template <typename... Args>
-    void clearTextInput(Args &&...textBoxes)
-    {
-        (textBoxes->setText(""), ...);
-    }
-    template <typename... Args>
-    void setDisableTextInput(bool disable, Args &&...textBoxes)
-    {
-        (textBoxes->setDisabled(disable), ...);
-    }
-    template <typename... Args>
-    void setDisableComboBox(bool disable, Args &&...comboBoxes)
-    {
-        (comboBoxes->setDisabled(disable), ...);
-    }
+    void updateSettingsVisibility(const QList<Setting> settings);
+    void updatePropertiesVisibility(const QList<Property> properties);
+    void loadSettings(const QList<Setting> settings);
+    void loadProperties(const QList<Property> properties);
+    void updateValueSettings(const QList<Setting> settings);
+    void updateValueProperties(const QList<Property> properties);
 };
 
 #endif // UIHANDLER_HPP

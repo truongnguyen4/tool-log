@@ -14,23 +14,20 @@ QList<Log> LogHelper::mListLogs = QList<Log>();
 Log LogHelper::convertToLog(const QString line)
 {
     QRegularExpressionMatch match = logcatPattern.match(line);
-    Log log;
     if (match.hasMatch())
     {
-        log.setDate(match.captured(1));
-        log.setTime(match.captured(2));
-        log.setPid(match.captured(3));
-        log.setTid(match.captured(4));
-        log.setLevel(match.captured(5));
-        log.setTag(match.captured(6));
-        log.setMsg(match.captured(7));
+        return Log(
+            match.captured(1),  // date
+            match.captured(2),  // time
+            match.captured(3),  // pid
+            match.captured(4),  // tid
+            match.captured(5),  // level
+            match.captured(6),  // tag
+            match.captured(7)   // msg
+        );
     }
-    else
-    {
-        Logger::w(TAG, "No match!");
-        log.setMsg(line);
-    }
-    return log;
+    Logger::w(TAG, "No match!");
+    return Log(line);
 }
 
 QList<Log> LogHelper::filterLogs(QList<Log> logs, int from, int to, const QStringList pids, const bool pidAndOperation,
@@ -248,22 +245,5 @@ QList<Log> LogHelper::filterLogsByLine(QList<Log> logs, int from, int to)
     return logs;
 }
 
-QStringList LogHelper::splitKeywords(const QString key, const bool andOperaion)
-{
-    if (andOperaion)
-    {
-        return splitKeywordsByAnd(key);
-    }
-    return splitKeywordsByOr(key);
-}
 
-QStringList LogHelper::splitKeywordsByOr(const QString key)
-{
-    return key.split(Constant::LogSplit::OR, Qt::SkipEmptyParts);
-}
-
-QStringList LogHelper::splitKeywordsByAnd(const QString key)
-{
-    return key.split(Constant::LogSplit::AND, Qt::SkipEmptyParts);
-}
 

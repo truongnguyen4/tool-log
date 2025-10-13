@@ -8,7 +8,7 @@
 #include "Logger.hpp"
 #include "Property.hpp"
 #include "Setting.hpp"
-#include <algorithm>
+#include <QDateTime>
 
 QString const MainWindow::TAG = "MainWindow";
 QStringList MainWindow::simulateDevices = {};
@@ -25,14 +25,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onReloadTable()
+void MainWindow::onFilterLog()
 {
     QString pid = ui->pid->text().trimmed();
     QString tag = ui->tag->text().trimmed();
     QString msg = ui->msg->text().trimmed();
     QString level = ui->level->text().trimmed();
     mDataHandler.addKey(pid, tag, msg, level);
-    QList<Log> logs = mDataHandler.onFilterKeyChanged(pid, tag, msg, level);
+    QList<Log> logs = mDataHandler.filterLogs(pid, tag, msg, level);
     mUiHandler.updateLogVisibility(logs);
 }
 
@@ -66,13 +66,16 @@ void MainWindow::onSetMsgHighLight()
 void MainWindow::onRefreshLog()
 {
     // UI logic
-    mUiHandler.clearTextInput(ui->pid, ui->tag, ui->msg, ui->level);
     ui->table_logmark->setRowCount(0);
 
     // Data logic
     QString filePath = ui->file->text().trimmed();
     QList<Log> listLogs = mDataHandler.refreshLog(filePath);
     mUiHandler.loadLogs(listLogs);
+    onFilterLog();
+    onSetTagHighLight();
+    onSetMsgHighLight();
+    onFind();
 }
 
 void MainWindow::onStart()
@@ -89,7 +92,7 @@ void MainWindow::onStart()
     if (errorCode != MainWindow::SUCCESS)
     {
         return;
-    } 
+    }
     isWatching = !isWatching;
     Logger::d(TAG, (isWatching ? QString("Start") : QString("Stop")) + " watching successfull");
 
@@ -105,6 +108,10 @@ void MainWindow::onClear()
 {
     mUiHandler.clearLogcat();
     const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty())
+    {
+        return;
+    }
     int errorCode = mDataHandler.clearLogcat(deviceId);
     NotificationHelper::showError(errorCode);
 }
@@ -125,7 +132,7 @@ void MainWindow::onDownPressed(QObject *obj)
     QString key = mDataHandler.nextKey(ui, obj);
     if (!key.isEmpty())
     {
-        mUiHandler.setLineEdit(obj, key);
+        static_cast<QLineEdit*>(obj)->setText(key);
     }
 }
 
@@ -134,7 +141,7 @@ void MainWindow::onUpPressed(QObject *obj)
     QString key = mDataHandler.previousKey(ui, obj);
     if (!key.isEmpty())
     {
-        mUiHandler.setLineEdit(obj, key);
+        static_cast<QLineEdit*>(obj)->setText(key);
     }
 }
 
@@ -144,10 +151,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     if (QLineEditClass && event->type() == QEvent::KeyPress) {
         QString objName = obj->objectName();
         if (objName == ui->find->objectName()
-            ||objName == ui->msg->objectName()
+            || objName == ui->msg->objectName()
             || objName == ui->tag->objectName()
             || objName == ui->pid->objectName()
-            || objName == ui->level->objectName())
+            || objName == ui->level->objectName()
+            || objName == ui->property_filter->objectName()
+            || objName == ui->setting_filter->objectName())
         {
             QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
             if (keyEvent->key() == Qt::Key_Down) {
@@ -164,15 +173,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-void MainWindow::onDeviceIdChanged()
-{
-    const QString deviceId = ui->device_ids->currentText();
-}
-
 void MainWindow::onChangeConnectDevices(QStringList deviceIds, const bool isConnected)
 {
     mUiHandler.refreshDeviceIds(deviceIds, isConnected);
-    onDeviceIdChanged();
 }
 
 void MainWindow::onStop()
@@ -185,16 +188,48 @@ void MainWindow::onFind()
 {
     QString find = ui->find->text();
     mDataHandler.addKey(find);
-    mUiHandler.highlightFindKey(find);
+    mUiHandler.setFindHighlight(find);
 }
+
 void MainWindow::onRefreshSettingProperty()
 {
-    QList<Setting> settings = mPropertyHandler.loadSettings();
-    std::sort(settings.begin(), settings.end(), [](const Setting &s1, const Setting &s2) {
-        return s1.getGroup() < s2.getGroup();
-    });
-    QList<Property> properties = mPropertyHandler.loadProperties();
-    mUiHandler.refreshSettingProperty(settings, properties);
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty())
+    {
+        return;
+    }
+    QList<Property> properties = mDataHandler.loadProperties(deviceId);
+    QList<Setting> settings = mDataHandler.loadSettings(deviceId);
+    if (!mUiHandler.isFirstLoadSettings) {
+        mUiHandler.loadSettings(settings);
+        mUiHandler.isFirstLoadSettings = true;
+    } else {
+        mUiHandler.updateValueSettings(settings);
+    }
+    if (!mUiHandler.isFirstLoadProperties) {
+        mUiHandler.loadProperties(properties);
+        mUiHandler.isFirstLoadProperties = true;
+    } else {
+        mUiHandler.updateValueProperties(properties);
+    }
+    onFilterSettings();
+    onFilterProperties();
+}
+
+void MainWindow::onFilterSettings()
+{
+    QString name = ui->setting_filter->text().trimmed();
+    mDataHandler.addKey("", name);
+    QList<Setting> settings = mDataHandler.filterSettings(name);
+    mUiHandler.updateSettingsVisibility(settings);
+}
+
+void MainWindow::onFilterProperties()
+{
+    QString name = ui->property_filter->text().trimmed();
+    mDataHandler.addKey(name, "");
+    QList<Property> properties = mDataHandler.filterProperties(name);
+    mUiHandler.updatePropertiesVisibility(properties);
 }
 
 void MainWindow::init()
@@ -203,10 +238,13 @@ void MainWindow::init()
     mProcessHandler.registerDeviceChangeListener(mDeviceListener);
 
     connect(ui->file, &QLineEdit::returnPressed, this, &MainWindow::onRefreshLog);
-    connect(ui->pid, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
-    connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
-    connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
-    connect(ui->level, &QLineEdit::returnPressed, this, &MainWindow::onReloadTable);
+    connect(ui->pid, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->level, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+
+    connect(ui->property_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterProperties);
+    connect(ui->setting_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterSettings);
 
     connect(ui->refresh, &QPushButton::pressed, this, &MainWindow::onRefreshSettingProperty);
 
@@ -216,6 +254,8 @@ void MainWindow::init()
     ui->msg->installEventFilter(this);
     ui->level->installEventFilter(this);
     ui->devices->installEventFilter(this);
+    ui->property_filter->installEventFilter(this);
+    ui->setting_filter->installEventFilter(this);
 
     connect(ui->table_logs, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
     connect(ui->table_logs, &QTableWidget::itemDoubleClicked, this, &MainWindow::onMarkItem);
@@ -227,6 +267,5 @@ void MainWindow::init()
     connect(ui->clear, &QPushButton::pressed, this, &MainWindow::onClear);
     connect(ui->setting, &QPushButton::pressed, this, &MainWindow::onSettings);
     connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
-    connect(ui->device_ids, &QComboBox::currentTextChanged, this, &MainWindow::onDeviceIdChanged);
     connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::onStop);
 }

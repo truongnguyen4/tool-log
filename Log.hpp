@@ -19,7 +19,10 @@ private:
 public:
     static int static_id;
 
-    Log();
+    Log() : line(static_id++) {}
+    Log(QString msg) : msg(msg), line(static_id++) {}
+    Log(QString date, QString time, QString pid, QString tid, QString level, QString tag, QString msg) 
+            : date(date), time(time), pid(pid), tid(tid), level(level), tag(tag), msg(msg), line(static_id++) {}
 
     const int &getLine() const;
     const QString &getDate() const;
