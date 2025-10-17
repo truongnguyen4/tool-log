@@ -6,7 +6,6 @@
 #include "NotificationHelper.hpp"
 
 QString const ProcessHelper::TAG = "ProcessHelper";
-QProcess *ProcessHelper::processReadLogCat = new QProcess();
 
 void ProcessHelper::registerDeviceChangeListener(DeviceChangeListener *listener)
 {
@@ -71,12 +70,12 @@ QStringList ProcessHelper::getDeviceIds()
     // return MainWindow::simulateDevices;
 }
 
-int ProcessHelper::clearLogcat(const QString deviceId)
+void ProcessHelper::clearLogcat(const QString deviceId)
 {
     if (deviceId.isEmpty())
     {
-        Logger::d(TAG, "Can't clear log due to DEVICE ID is empty.");
-        return MainWindow::ERROR_DEVICE_ID;
+        Logger::w(TAG, "Can't clear log due to DEVICE ID is empty.");
+        return;
     }
     Logger::d(TAG, "Clear logcat on DEVICE ID = " + deviceId);
     QStringList command = {"-s", deviceId, "logcat", "-c"};
@@ -85,12 +84,11 @@ int ProcessHelper::clearLogcat(const QString deviceId)
     if (exitCode != 0)
     {
         NotificationHelper::showExitCode();
-        return MainWindow::ERROR_DEVICE_ID;
+        return;
     }
-    return MainWindow::SUCCESS;
 }
 
-int ProcessHelper::startWatchLog(const QString filePath, const QString deviceId)
+void ProcessHelper::startWatchLog(const QString filePath, const QString deviceId)
 {
     // Check if the file is already being watched, stop the current watch
     if (processReadLogCat->state() == QProcess::Running)
@@ -98,26 +96,24 @@ int ProcessHelper::startWatchLog(const QString filePath, const QString deviceId)
         processReadLogCat->kill();
         processReadLogCat->waitForFinished();
         Logger::d(TAG, "Stop watching log");
-        return MainWindow::SUCCESS;
+        return;
     }
 
     if (deviceId.isEmpty())
     {
         Logger::d(TAG, "Can't start watching device due to DEVICE ID is empty.");
-        return MainWindow::ERROR_DEVICE_ID;
+        return;
     }
 
     if (!FileHelper::checkPath(filePath))
     {
         Logger::d(TAG, "Can't start watching log due to FILE PATH is invalid.");
-        return MainWindow::ERROR_FILE_PATH;
+        return;
     }
 
     ProcessHelper::processReadLogCat->setStandardOutputFile(filePath, QIODevice::NewOnly);
     ProcessHelper::processReadLogCat->start("adb", QStringList() << "-s" << deviceId << "logcat");
     Logger::d(TAG, "Start watching log, PID = " + QString::number(processReadLogCat->processId()) + ", DEVICE ID = " + deviceId);
-
-    return MainWindow::SUCCESS;
 }
 
 ProcessHelper::ProcessHelper()
@@ -130,6 +126,24 @@ ProcessHelper::ProcessHelper()
         Logger::d(TAG, "Start thread detect devices");
         mThreadDetectDevices->start();
     }
+    mProcessRealtimeLog->setProcessChannelMode(QProcess::MergedChannels);
+    auto buffer = std::make_shared<QByteArray>();
+    QObject::connect(mProcessRealtimeLog, &QProcess::readyReadStandardOutput, mProcessRealtimeLog, [this, buffer]()
+                     {
+                         buffer->append(mProcessRealtimeLog->readAllStandardOutput());
+                         int idx = buffer->indexOf('\n');
+                         if (idx == -1)
+                         {
+                             return;
+                         }
+                         QByteArray raw = buffer->left(idx);
+                         buffer->remove(0, idx + 1);
+
+                         QString line = QString::fromUtf8(raw).trimmed();
+                         Log log = LogHelper::convertToLog(line);
+                         LogHelper::getInstance()->mListLogs.append(log);
+                         LogHelper::getInstance()->updateHiddenLog(log);
+                         insertLogToTable(log); });
 }
 
 void ProcessHelper::stop()
@@ -138,6 +152,18 @@ void ProcessHelper::stop()
     {
         Logger::d(TAG, "Stop thread detect devices");
         mThreadDetectDevices->quit();
+    }
+    if (processReadLogCat != nullptr && processReadLogCat->state() == QProcess::Running)
+    {
+        Logger::d(TAG, "Stop process read logcat");
+        processReadLogCat->kill();
+        processReadLogCat->waitForFinished();
+    }
+    if (mProcessRealtimeLog != nullptr && mProcessRealtimeLog->state() == QProcess::Running)
+    {
+        Logger::d(TAG, "Stop process read logcat real-time");
+        mProcessRealtimeLog->kill();
+        mProcessRealtimeLog->waitForFinished();
     }
 }
 
@@ -191,4 +217,30 @@ void ProcessHelper::detectDevices()
         Logger::d(TAG, "Update mCurrentDeviceIds");
         mCurrentDeviceIds = newDeviceIds;
     }
+}
+
+void ProcessHelper::startWatchLogRealTime(const QString deviceId)
+{
+    if (deviceId.isEmpty())
+    {
+        Logger::e(TAG, "Invalid parameters");
+        return;
+    }
+    if (mProcessRealtimeLog->state() == QProcess::Running)
+    {
+        Logger::w(TAG, "Stopping previous real-time log process");
+        mProcessRealtimeLog->kill();
+        mProcessRealtimeLog->waitForFinished();
+        return;
+    }
+
+    Logger::d(TAG, "Starting real-time log for device ID: " + deviceId);
+    QStringList command = {"-s", deviceId, "logcat"};
+    mProcessRealtimeLog->start("adb", command);
+}
+
+void ProcessHelper::insertLogToTable(Log log)
+{
+    LogHelper::getInstance()->updateHiddenLog(log);
+    UiHandler::getInstance()->insertLogToTable(log);
 }

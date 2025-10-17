@@ -17,6 +17,7 @@ class UiHandler
 {
 private:
     static const QString TAG;
+    static inline UiHandler *instance = nullptr;
     int LINE_HEIGTH = 30;
     QColor MARK_LOG_FOREGROUND_COLOR = QColorConstants::Black;
     QColor MARK_LOG_BACKGROUND_COLOR = QColorConstants::LightGray;
@@ -26,15 +27,37 @@ private:
     Ui::MainWindow *mUi = nullptr;
     void setHighLightMarkRow(QTableWidget *table, int row, QBrush foregroundColor = QBrush(), QBrush backgroundColor = QBrush());
     void initHLDelegate();
-
+    UiHandler() {};
 public:
+    static UiHandler *getInstance()
+    {
+        if (instance == nullptr)
+        {
+            instance = new UiHandler();
+        }
+        return instance;
+    }
     bool isFirstLoadSettings = false;
     bool isFirstLoadProperties = false;
-    void setFindHighlight(const QString key);
-    void setTagHighLight(const QString &tag);
-    void setMsgHighLight(const QString &msg);
-    void loadLogs(QList<Log> logs);
-    void updateLogVisibility(QList<Log> &logs);
+
+    void highlightFind(const QString key);
+    void highlightTag(const QString &tag);
+    void highlightMsg(const QString &msg);
+
+    void loadLogs();
+    void updateLogVisibility();
+    void insertLogToTable(Log log);
+    
+    void loadSettings();
+    void updateValueSettings();
+    void insertSettingToTable(const Setting setting, const int row);
+    void updateSettingsVisibility();
+    
+    void loadProperties();
+    void updateValueProperties();
+    void insertPropertyToTable(const Property property, const int row);
+    void updatePropertiesVisibility();
+
     void updateLogShow(QTableWidgetItem *item);
     void markLog(QTableWidgetItem *item = nullptr);
     void focusLog(QTableWidgetItem *item);
@@ -43,12 +66,6 @@ public:
     void clearMarkLogs();
     void refreshDeviceIds(QStringList deviceIds, const bool isConnected);
     void startWatching(const bool startWatch);
-    void updateSettingsVisibility(const QList<Setting> settings);
-    void updatePropertiesVisibility(const QList<Property> properties);
-    void loadSettings(const QList<Setting> settings);
-    void loadProperties(const QList<Property> properties);
-    void updateValueSettings(const QList<Setting> settings);
-    void updateValueProperties(const QList<Property> properties);
 };
 
 #endif // UIHANDLER_HPP

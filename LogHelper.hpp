@@ -10,20 +10,36 @@ class LogHelper
 private:
     static const QRegularExpression logcatPattern;
     static const QString TAG;
-    
+    static inline LogHelper *instance = nullptr;
+
 public:
-    static QList<Log> mListLogs;
+    static LogHelper *getInstance()
+    {
+        if (instance == nullptr)
+        {
+            instance = new LogHelper();
+        }
+        return instance;
+    }
+
+    QList<Log> mListLogs;
+    QStringList mTags;
+    QStringList mLevels;
+    QStringList mPids;
+    QStringList mMsgs;
+    bool tagAndOperation = false;
+    bool levelAndOperation = false;
+    bool pidAndOperation = false;
+    bool msgAndOperation = false;
+
+    void filterLogs(QList<Log> &logs);
+
+    void updateHiddenLog(Log &log);
+    static void updateHiddenLogByTag(Log &log, const QStringList tags, const bool andOperation);
+    static void updateHiddenLogByMsg(Log &log, const QStringList messages, const bool andOperation);
+    static void updateHiddenLogByLevel(Log &log, const QStringList levels, const bool andOperation);
+    static void updateHiddenLogByPid(Log &log, const QStringList pids, const bool andOperation);
     static Log convertToLog(const QString line);
-    static QList<Log> filterLogs(QList<Log> logs, int from, int to,
-                                const QStringList pid, const bool pidAndOperation,
-                                const QStringList tag, const bool tagAndOperation,
-                                const QStringList msg, const bool msgAndOperation,
-                                const QStringList level, const bool levelAndOperation);
-    static QList<Log> filterLogsByTag(QList<Log> logs, const QStringList tag, const bool andOperate);
-    static QList<Log> filterLogsByMsg(QList<Log> logs, const QStringList msg, const bool andOperate);
-    static QList<Log> filterLogsByLevel(QList<Log> logs, const QStringList level, const bool andOperate);
-    static QList<Log> filterLogsByPid(QList<Log> logs, const QStringList pid, const bool andOperate);
-    static QList<Log> filterLogsByLine(QList<Log> logs, const int from, const int to);
 };
 
 #endif // LOGHELPER_HPP

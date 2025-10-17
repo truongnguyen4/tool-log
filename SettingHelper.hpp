@@ -8,15 +8,28 @@ class SettingHelper
 {
 private:
     inline static const QString TAG = "SettingHelper";
-    static const QRegularExpression regexSetting;
+    const QRegularExpression regexSetting = QRegularExpression(
+        R"(^([\w\.\-\:]+)=(.*)$)",
+        QRegularExpression::CaseInsensitiveOption);
+    ;
+    static inline SettingHelper *instance = nullptr;
+    SettingHelper() {};
 
 public:
-    inline static QList<Setting> mSettings = QList<Setting>();
-    static void loadSettings(const QString deviceId);
-    static Setting convertToSetting(const QString group, const QString line);
-    static void setSettings(const QList<Setting> settings, const QString deviceId);
-    static void setSetting(const Setting setting, const QString deviceId);
-    static QList<Setting> filterSettings(QList<Setting> settings, const QStringList nameFilters);
+    static SettingHelper *getInstance()
+    {
+        if (instance == nullptr)
+        {
+            instance = new SettingHelper();
+        }
+        return instance;
+    }
+    QList<Setting> mListSettings;
+    void loadSettings(const QString deviceId);
+    Setting convertToSetting(const QString group, const QString line);
+    void setSettings(const QList<Setting> settings, const QString deviceId);
+    void setSetting(const Setting setting, const QString deviceId);
+    void filterSettings(QList<Setting> &settings, const QStringList nameFilters);
 };
 
 #endif // SETTINGHELPER_H

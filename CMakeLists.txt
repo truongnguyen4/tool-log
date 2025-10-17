@@ -66,6 +66,7 @@ qt_add_executable(tool-log
     QLineEditDefault.h
     resource.qrc
     UtilHelper.hpp
+
 )
 
 target_link_libraries(tool-log PRIVATE Qt6::Widgets)

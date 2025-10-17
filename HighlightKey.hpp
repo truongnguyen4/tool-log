@@ -3,7 +3,7 @@
 #include "HighlightDelegate.hpp"
 #include <QApplication>
 #include <QStyle>
-#include "Logger.hpp"
+
 class HighlightKey : public HighlightDelegate
 {
 private:

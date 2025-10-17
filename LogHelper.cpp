@@ -9,7 +9,6 @@ const QString LogHelper::TAG = "LogHelper";
 const QRegularExpression LogHelper::logcatPattern(
     R"(^\s*(\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d+)\s+(\d+)\s+(\d+)\s+([A-Za-z])\s+(.+?)\s*:\s*(.*)$)",
     QRegularExpression::CaseInsensitiveOption);
-QList<Log> LogHelper::mListLogs = QList<Log>();
 
 Log LogHelper::convertToLog(const QString line)
 {
@@ -17,233 +16,186 @@ Log LogHelper::convertToLog(const QString line)
     if (match.hasMatch())
     {
         return Log(
-            match.captured(1),  // date
-            match.captured(2),  // time
-            match.captured(3),  // pid
-            match.captured(4),  // tid
-            match.captured(5),  // level
-            match.captured(6),  // tag
-            match.captured(7)   // msg
+            match.captured(1), // date
+            match.captured(2), // time
+            match.captured(3), // pid
+            match.captured(4), // tid
+            match.captured(5), // level
+            match.captured(6), // tag
+            match.captured(7)  // msg
         );
     }
     Logger::w(TAG, "No match!");
     return Log(line);
 }
 
-QList<Log> LogHelper::filterLogs(QList<Log> logs, int from, int to, const QStringList pids, const bool pidAndOperation,
-                                 const QStringList tags, const bool tagAndOperation,
-                                 const QStringList messages, const bool msgAndOperation,
-                                 const QStringList levels, const bool levelAndOperation)
+void LogHelper::filterLogs(QList<Log> &logs)
 {
     Logger::setTimeFrom("Filter", QDateTime::currentMSecsSinceEpoch());
-
     for (Log &log : logs)
     {
         log.setHidden(false);
+        LogHelper::updateHiddenLog(log);
     }
-
-    if (!tags.empty())
-    {
-        logs = filterLogsByTag(logs, tags, tagAndOperation);
-    }
-
-    if (!pids.empty())
-    {
-        logs = filterLogsByPid(logs, pids, pidAndOperation);
-    }
-
-    if (!messages.empty())
-    {
-        logs = filterLogsByMsg(logs, messages, msgAndOperation);
-    }
-
-    if (!levels.empty())
-    {
-        logs = filterLogsByLevel(logs, levels, levelAndOperation);
-    }
-
-    // filterLogsByLine(logs, from, to);
-
     Logger::setTimeTo("Filter", QDateTime::currentMSecsSinceEpoch());
-    return logs;
 }
 
-QList<Log> LogHelper::filterLogsByTag(QList<Log> logs, QStringList tags, bool andOperation)
+void LogHelper::updateHiddenLog(Log &log)
 {
-    Logger::d(TAG, "Filtering logs by tags: " + tags.join(", ") + ", tagAndOperation: " + QString::number(andOperation));
-    for (Log &log : logs)
+    if (!log.getHidden())
     {
-        if (log.getHidden())
-        {
-            continue;
-        }
-        QString logTag = log.getTag();
-        if (andOperation)
-        {
-            bool isHidden = false;
-            for (const QString &tag : tags)
-            {
-                if (!logTag.contains(tag, Qt::CaseInsensitive))
-                {
-                    isHidden = true;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
-        else
-        {
-            bool isHidden = true;
-            for (const QString &tag : tags)
-            {
-                if (logTag.contains(tag, Qt::CaseInsensitive))
-                {
-                    isHidden = false;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
+        LogHelper::updateHiddenLogByTag(log, mTags, tagAndOperation);
     }
-    return logs;
+    if (!log.getHidden())
+    {
+        LogHelper::updateHiddenLogByLevel(log, mLevels, levelAndOperation);
+    }
+    if (!log.getHidden())
+    {
+        LogHelper::updateHiddenLogByPid(log, mPids, pidAndOperation);
+    }
+    if (!log.getHidden())
+    {
+        LogHelper::updateHiddenLogByMsg(log, mMsgs, msgAndOperation);
+    }
 }
 
-QList<Log> LogHelper::filterLogsByMsg(QList<Log> logs, QStringList messages, bool andOperation)
+void LogHelper::updateHiddenLogByTag(Log &log, const QStringList tags, const bool andOperation)
 {
-    Logger::d(TAG, "Filtering logs by messages: " + messages.join(", "));
-    for (Log &log : logs)
+    if (tags.isEmpty())
     {
-        if (log.getHidden())
-        {
-            continue;
-        }
-        QString logMsg = log.getMsg();
-        if (andOperation)
-        {
-            bool isHidden = false;
-            for (const QString &message : messages)
-            {
-                if (!logMsg.contains(message, Qt::CaseInsensitive))
-                {
-                    isHidden = true;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
-        else
-        {
-            bool isHidden = true;
-            for (const QString &message : messages)
-            {
-                if (logMsg.contains(message, Qt::CaseInsensitive))
-                {
-                    isHidden = false;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
+        return;
     }
-    return logs;
+    QString logTag = log.getTag();
+    if (andOperation)
+    {
+        bool isHidden = false;
+        for (const QString &tag : tags)
+        {
+            if (!logTag.contains(tag, Qt::CaseInsensitive))
+            {
+                isHidden = true;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
+    else
+    {
+        bool isHidden = true;
+        for (const QString &tag : tags)
+        {
+            if (logTag.contains(tag, Qt::CaseInsensitive))
+            {
+                isHidden = false;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
 }
 
-QList<Log> LogHelper::filterLogsByLevel(QList<Log> logs, QStringList levels, bool andOperation)
+void LogHelper::updateHiddenLogByMsg(Log &log, const QStringList messages, const bool andOperation)
 {
-    Logger::d(TAG, "Filtering logs by levels: " + levels.join(", "));
-    for (Log &log : logs)
+    if (messages.isEmpty())
     {
-        if (log.getHidden())
-        {
-            continue;
-        }
-        QString logLevel = log.getLevel();
-        if (andOperation)
-        {
-            bool isHidden = false;
-            for (const QString &level : levels)
-            {
-                if (!logLevel.contains(level, Qt::CaseInsensitive))
-                {
-                    isHidden = true;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
-        else
-        {
-            bool isHidden = true;
-            for (const QString &level : levels)
-            {
-                if (logLevel.contains(level, Qt::CaseInsensitive))
-                {
-                    isHidden = false;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
+        return;
     }
-    return logs;
+    QString logMsg = log.getMsg();
+    if (andOperation)
+    {
+        bool isHidden = false;
+        for (const QString &message : messages)
+        {
+            if (!logMsg.contains(message, Qt::CaseInsensitive))
+            {
+                isHidden = true;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
+    else
+    {
+        bool isHidden = true;
+        for (const QString &message : messages)
+        {
+            if (logMsg.contains(message, Qt::CaseInsensitive))
+            {
+                isHidden = false;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
 }
 
-QList<Log> LogHelper::filterLogsByPid(QList<Log> logs, QStringList pids, bool andOperation)
+void LogHelper::updateHiddenLogByLevel(Log &log, const QStringList levels, const bool andOperation)
 {
-    Logger::d(TAG, "Filtering logs by PIDs: " + pids.join(", "));
-    for (Log &log : logs)
+    if (levels.isEmpty())
     {
-        if (log.getHidden())
-        {
-            continue;
-        }
-        QString logPid = log.getPid();
-        if (andOperation)
-        {
-            bool isHidden = false;
-            for (const QString &pid : pids)
-            {
-                if (!logPid.contains(pid, Qt::CaseInsensitive))
-                {
-                    isHidden = true;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
-        else
-        {
-            bool isHidden = true;
-            for (const QString &pid : pids)
-            {
-                if (logPid.contains(pid, Qt::CaseInsensitive))
-                {
-                    isHidden = false;
-                    break;
-                }
-            }
-            log.setHidden(isHidden);
-        }
+        return;
     }
-    return logs;
+    QString logLevel = log.getLevel();
+    if (andOperation)
+    {
+        bool isHidden = false;
+        for (const QString &level : levels)
+        {
+            if (!logLevel.contains(level, Qt::CaseInsensitive))
+            {
+                isHidden = true;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
+    else
+    {
+        bool isHidden = true;
+        for (const QString &level : levels)
+        {
+            if (logLevel.contains(level, Qt::CaseInsensitive))
+            {
+                isHidden = false;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
 }
 
-QList<Log> LogHelper::filterLogsByLine(QList<Log> logs, int from, int to)
+void LogHelper::updateHiddenLogByPid(Log &log, const QStringList pids, const bool andOperation)
 {
-    Logger::d(TAG, QString::fromStdString("Filtering logs by line from " + std::to_string(from) + " to " + std::to_string(to)));
-    for (Log &log : logs)
+    if (pids.isEmpty())
     {
-        if (log.getHidden())
-        {
-            continue;
-        }
-        if (log.getLine() < from || log.getLine() > to)
-        {
-            log.setHidden(true);
-        }
+        return;
     }
-    return logs;
+    QString logPid = log.getPid();
+    if (andOperation)
+    {
+        bool isHidden = false;
+        for (const QString &pid : pids)
+        {
+            if (!logPid.contains(pid, Qt::CaseInsensitive))
+            {
+                isHidden = true;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
+    else
+    {
+        bool isHidden = true;
+        for (const QString &pid : pids)
+        {
+            if (logPid.contains(pid, Qt::CaseInsensitive))
+            {
+                isHidden = false;
+                break;
+            }
+        }
+        log.setHidden(isHidden);
+    }
 }
-
-
-

@@ -10,38 +10,44 @@
 
 const QString DataHandler::TAG = "DataHandler";
 
-QList<Log> DataHandler::filterLogs(const QString &pid, const QString &tag, const QString &msg, const QString &level)
+void DataHandler::filterLogs(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {
-    return LogHelper::filterLogs(LogHelper::mListLogs,
-                                    1 /* from line*/,
-                                    LogHelper::mListLogs.size() /* to line*/,
-                                    UtilHelper::splitKeywords(pid), pid.contains(Constant::Split::AND),
-                                    UtilHelper::splitKeywords(tag), tag.contains(Constant::Split::AND),
-                                    UtilHelper::splitKeywords(msg), msg.contains(Constant::Split::AND),
-                                    UtilHelper::splitKeywords(level), level.contains(Constant::Split::AND));
+    LogHelper *logHelper = LogHelper::getInstance();
+    logHelper->mTags = UtilHelper::splitKeywords(tag);
+    logHelper->mLevels = UtilHelper::splitKeywords(level);
+    logHelper->mPids = UtilHelper::splitKeywords(pid);
+    logHelper->mMsgs = UtilHelper::splitKeywords(msg);
+    logHelper->tagAndOperation = tag.contains(Constant::Split::AND);
+    logHelper->levelAndOperation = level.contains(Constant::Split::AND);
+    logHelper->pidAndOperation = pid.contains(Constant::Split::AND);
+    logHelper->msgAndOperation = msg.contains(Constant::Split::AND);
+
+    logHelper->filterLogs(logHelper->mListLogs);
 }
 
-QList<Log> DataHandler::refreshLog(const QString &filePath)
+void DataHandler::refreshLog(const QString &filePath)
 {
     if (!FileHelper::checkPath(filePath))
     {
-        Logger::d(TAG, "refreshLog");
         NotificationHelper::showError(MainWindow::ERROR_FILE_PATH);
-        return QList<Log>();
     }
-    LogHelper::mListLogs = mFileLogHelper.readLogsFromFile(filePath);
-    return LogHelper::mListLogs;
+    LogHelper::getInstance()->mListLogs = FileHelper::readLogsFromFile(filePath);
 }
 
-int DataHandler::startWatchLog(QString filePath, const QString deviceId)
+void DataHandler::startWatchLog(QString filePath, const QString deviceId)
 {
-    return ProcessHelper::startWatchLog(filePath, deviceId);
+    ProcessHelper::getInstance()->startWatchLog(filePath, deviceId);
 }
 
-int DataHandler::clearLogcat(const QString deviceId)
+void DataHandler::startWatchLogRealTime(const QString deviceId)
 {
-    LogHelper::mListLogs.clear();
-    return ProcessHelper::clearLogcat(deviceId);
+    ProcessHelper::getInstance()->startWatchLogRealTime(deviceId);
+}
+
+void DataHandler::clearLogcat(const QString deviceId)
+{
+    LogHelper::getInstance()->mListLogs.clear();
+    ProcessHelper::getInstance()->clearLogcat(deviceId);
 }
 
 void DataHandler::addKey(const QString &find)
@@ -261,26 +267,24 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
     return "";
 }
 
-QList<Property> DataHandler::loadProperties(const QString deviceId)
+void DataHandler::loadProperties(const QString deviceId)
 {
-    PropertyHelper::loadProperties(deviceId);
-    return PropertyHelper::mProperties;
+    PropertyHelper::getInstance()->loadProperties(deviceId);
 }
 
-QList<Setting> DataHandler::loadSettings(const QString deviceId)
+void DataHandler::loadSettings(const QString deviceId)
 {
-    SettingHelper::loadSettings(deviceId);
-    return SettingHelper::mSettings;
+    SettingHelper::getInstance()->loadSettings(deviceId);
 }
 
-QList<Setting> DataHandler::filterSettings(const QString nameFilter)
+void DataHandler::filterSettings(const QString name)
 {
-    const QStringList names = UtilHelper::splitKeywords(nameFilter);
-    return SettingHelper::filterSettings(SettingHelper::mSettings, names);
+    const QStringList names = UtilHelper::splitKeywords(name);
+    SettingHelper::getInstance()->filterSettings(SettingHelper::getInstance()->mListSettings, names);
 }
 
-QList<Property> DataHandler::filterProperties(const QString nameFilter)
+void DataHandler::filterProperties(const QString name)
 {
-    QStringList names = UtilHelper::splitKeywords(nameFilter);
-    return PropertyHelper::filterProperty(PropertyHelper::mProperties, names);
+    QStringList names = UtilHelper::splitKeywords(name);
+    PropertyHelper::getInstance()->filterProperty(PropertyHelper::getInstance()->mListProperties, names);
 }

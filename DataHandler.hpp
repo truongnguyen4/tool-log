@@ -6,13 +6,14 @@
 #include "ProcessHelper.hpp"
 #include "Property.hpp"
 #include "Setting.hpp"
-
+#include "LogHelper.hpp"
 class DataHandler
 {
 private:
     static const QString TAG;
     FileHelper mFileLogHelper;
-    ProcessHelper mProcessHandler;
+    ProcessHelper *mProcessHandler = ProcessHelper::getInstance();
+    LogHelper mLogHelper;
     QStringList mListFind;
     QStringList mListMsg;
     QStringList mListTag;
@@ -27,20 +28,34 @@ private:
     int mLevelId = 0;
     int mPropertyId = 0;
     int mSettingId = 0;
+    static inline DataHandler* mDataHandler = nullptr;
+    DataHandler() {};
 public:
+    static DataHandler* getInstance()
+    {
+        if (!mDataHandler)
+        {
+            mDataHandler = new DataHandler();
+        }
+        return mDataHandler;
+    }
     void addKey(const QString &tag, const QString &msg, const QString &level, const QString &pid);
     void addKey(const QString &find);
     void addKey(const QString &property,const QString &setting);
-    QList<Log> filterLogs(const QString &tag, const QString &msg, const QString &level, const QString &pid);
-    QList<Log> refreshLog(const QString &file);
-    int startWatchLog(QString filePath, const QString deviceId);
-    int clearLogcat(const QString deviceId);
+
+    void filterLogs(const QString &tag, const QString &msg, const QString &level, const QString &pid);
+    void filterSettings(const QString nameFilter);
+    void filterProperties(const QString nameFilter);
+
+    void refreshLog(const QString &file);
+    void loadProperties(const QString deviceId);
+    void loadSettings(const QString deviceId);
+
+    void startWatchLog(QString filePath, const QString deviceId);
+    void startWatchLogRealTime(const QString deviceId);
+    void clearLogcat(const QString deviceId);
     QString previousKey(Ui::MainWindow *ui, QObject *obj);
     QString nextKey(Ui::MainWindow *ui, QObject *obj);
-    QList<Property> loadProperties(const QString deviceId);
-    QList<Setting> loadSettings(const QString deviceId);
-    QList<Setting> filterSettings(const QString nameFilter);
-    QList<Property> filterProperties(const QString nameFilter);
 };
 
 #endif // DATAHANDLER_H

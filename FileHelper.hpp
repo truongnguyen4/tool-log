@@ -12,6 +12,6 @@ private:
     static const QString TAG;
 public:
     static bool checkPath(const QString filePath);
-    QList<Log> readLogsFromFile(const QString filePath);
+    static QList<Log> readLogsFromFile(const QString filePath);
 };
 #endif // FILELOGHELPER_H

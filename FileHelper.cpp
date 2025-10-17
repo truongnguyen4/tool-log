@@ -28,7 +28,9 @@ QList<Log> FileHelper::readLogsFromFile(const QString filePath)
         while (!in.atEnd())
         {
             QString line = in.readLine();
-            logs.push_back(LogHelper::convertToLog(line));
+            Log log = LogHelper::convertToLog(line);
+            LogHelper::getInstance()->updateHiddenLog(log);
+            logs.push_back(log);
         }
         file.close();
         return logs;

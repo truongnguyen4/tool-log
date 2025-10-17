@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-
 #include "UiHandler.hpp"
 #include "DataHandler.hpp"
 #include <QMainWindow>
@@ -11,8 +10,9 @@
 #include "ProcessHelper.hpp"
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 QT_END_NAMESPACE
 
@@ -32,63 +32,63 @@ public:
 private:
     static const QString TAG;
     Ui::MainWindow *ui;
-    UiHandler mUiHandler;
-    DataHandler mDataHandler;
+    UiHandler *mUiHandler = UiHandler::getInstance();
+    DataHandler *mDataHandler = DataHandler::getInstance();
     SettingDialog mSettingDialog;
     NotificationDialog mNotificationDialog;
-    ProcessHelper mProcessHandler;
-
+    ProcessHelper *mProcessHandler = ProcessHelper::getInstance();
     class MainWindowDeviceChangeListener : public ProcessHelper::DeviceChangeListener
     {
     public:
-        MainWindowDeviceChangeListener(MainWindow* mw) : mainWindow(mw) {}
+        MainWindowDeviceChangeListener(MainWindow *mw) : mainWindow(mw) {}
         void onDevicesIsConnected(QStringList deviceIds) override
         {
-            if (mainWindow) {
+            if (mainWindow)
+            {
                 mainWindow->onChangeConnectDevices(deviceIds, true);
             }
         }
         void onDevicesIsDisconnected(QStringList deviceIds) override
         {
-            if (mainWindow) {
+            if (mainWindow)
+            {
                 mainWindow->onChangeConnectDevices(deviceIds, false);
             }
         }
     private:
-        MainWindow* mainWindow;
+        MainWindow *mainWindow;
     };
-    MainWindowDeviceChangeListener* mDeviceListener = new MainWindowDeviceChangeListener(this);
 
-    bool isWatching = 0;
+    MainWindowDeviceChangeListener *mDeviceListener = new MainWindowDeviceChangeListener(this);
+
+    bool isWatching = false;
 
     void init();
-    void onStop();
-    void onRefreshDeviceIds();
-    void onChangeConnectDevices(QStringList deviceIds, const bool isConnected);
-
-    void onFilterLog();
-    void onShowItem(QTableWidgetItem *item);
-    void onMarkItem(QTableWidgetItem *item);
-    void onFocusItem(QTableWidgetItem *item);
-    void onRefreshLog();
-    void onSetTagHighLight();
-    void onSetMsgHighLight();
     void onStart();
-    void onFind();
+    void onStop();
     void onClear();
-    void onSettings();
-    void onClearMark();
-    void onDownPressed(QObject *obj);
-    void onUpPressed(QObject *obj);
-    void onDeviceIdChanged();
-
+    
+    void onFilterLog();
     void onFilterProperties();
     void onFilterSettings();
+    
+    void onFind();
+    void onSetTagHighLight();
+    void onSetMsgHighLight();
+    
+    void onMarkItem(QTableWidgetItem *item);
+    void onFocusItem(QTableWidgetItem *item);
+    void onClearMark();
+    
+    void onRefreshLog();
     void onRefreshSettingProperty();
-    bool eventFilter(QObject *obj, QEvent *event);
+    void onRefreshDeviceIds();
 
-signals:
-    void downPressed();
-    void upPressed();
+    void onChangeConnectDevices(QStringList deviceIds, const bool isConnected);
+    void onShowItem(QTableWidgetItem *item);
+    void onSettings();
+    void onDownPressed(QObject *obj);
+    void onUpPressed(QObject *obj);
+    bool eventFilter(QObject *obj, QEvent *event);
 };
 #endif // MAINWINDOW_H

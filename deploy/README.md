@@ -7,6 +7,10 @@ How to deploy:
         linuxdeploy-plugin-qt-x86_64.AppImage: https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases 
         linuxdeploy-x86_64.AppImage: https://github.com/linuxdeploy/linuxdeploy/releases 
 
+
+
+
+
     Create desktop file (deploy.desktop) 
         [Desktop Entry] 
         Name=tool-log 
