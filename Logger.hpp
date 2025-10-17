@@ -61,7 +61,7 @@ public:
     }
 private:
     inline static QMap<QString, QPair<qint64, qint64>> mTimeStampMap = QMap<QString, QPair<qint64, qint64>>();
-    inline static bool VERBOSE = false;
+    inline static bool VERBOSE = true;
 
 };
 #endif // LOGGER_H

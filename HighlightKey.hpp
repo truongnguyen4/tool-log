@@ -8,35 +8,35 @@ class HighlightKey : public HighlightDelegate
 {
 private:
     QList<QPair<QColor, QColor>> mKeyFilterColors = {
-        {QColor("#1976D2"), QColor("#E3F2FD")},   // Blue on light blue
-        {QColor("#388E3C"), QColor("#C8E6C9")},   // Green on light green
-        {QColor("#FBC02D"), QColor("#FFF9C4")},   // Yellow on light yellow
-        {QColor("#D32F2F"), QColor("#FFCDD2")},   // Red on light red
-        {QColor("#7B1FA2"), QColor("#E1BEE7")},   // Purple on light purple
-        {QColor("#F57C00"), QColor("#FFE0B2")},   // Orange on light orange
-        {QColor("#0288D1"), QColor("#B3E5FC")},   // Cyan on light cyan
-        {QColor("#C2185B"), QColor("#F8BBD0")},   // Pink on light pink
-        {QColor("#455A64"), QColor("#CFD8DC")},   // Blue Grey on light blue grey
-        {QColor("#009688"), QColor("#B2DFDB")},   // Teal on light teal
-        {QColor("#8D6E63"), QColor("#D7CCC8")}    // Brown on light brown
+        {QColor(25, 118, 210), QColor(227, 242, 253)}, // Blue on light blue
+        {QColor(56, 142, 60), QColor(200, 230, 201)},  // Green on light green
+        {QColor(251, 192, 45), QColor(255, 249, 196)}, // Yellow on light yellow
+        {QColor(211, 47, 47), QColor(255, 205, 210)},  // Red on light red
+        {QColor(123, 31, 162), QColor(225, 190, 231)}, // Purple on light purple
+        {QColor(245, 124, 0), QColor(255, 224, 178)},  // Orange on light orange
+        {QColor(2, 136, 209), QColor(179, 229, 252)},  // Cyan on light cyan
+        {QColor(194, 24, 91), QColor(248, 187, 208)},  // Pink on light pink
+        {QColor(69, 90, 100), QColor(207, 216, 220)},  // Blue Grey on light blue grey
+        {QColor(0, 150, 136), QColor(178, 223, 219)},  // Teal on light teal
+        {QColor(141, 110, 99), QColor(215, 204, 200)}  // Brown on light brown
     };
 
     QList<QPair<QColor, QColor>> mKeyFindColors = {
-        {QColor("#FF5722"), QColor("#FFE0B2")},   // Deep orange on pale orange
-        {QColor("#3F51B5"), QColor("#C5CAE9")},   // Indigo on pale indigo
-        {QColor("#009688"), QColor("#B2DFDB")},   // Teal on pale teal
-        {QColor("#CDDC39"), QColor("#FFF9C4")},   // Lime on pale yellow
-        {QColor("#E91E63"), QColor("#F8BBD0")},   // Pink on pale pink
-        {QColor("#00BCD4"), QColor("#B3E5FC")},   // Cyan on pale cyan
-        {QColor("#607D8B"), QColor("#CFD8DC")},   // Blue Grey on pale blue grey
-        {QColor("#8BC34A"), QColor("#DCEDC8")},   // Light Green on pale green
-        {QColor("#FFC107"), QColor("#FFECB3")},   // Amber on pale amber
-        {QColor("#9C27B0"), QColor("#E1BEE7")},   // Purple on pale purple
-        {QColor("#795548"), QColor("#D7CCC8")}    // Brown on pale brown
+        {QColor(255, 87, 34), QColor(255, 224, 178)},  // Deep orange on pale orange
+        {QColor(63, 81, 181), QColor(197, 202, 233)},  // Indigo on pale indigo
+        {QColor(0, 150, 136), QColor(178, 223, 219)},  // Teal on pale teal
+        {QColor(205, 220, 57), QColor(255, 249, 196)}, // Lime on pale yellow
+        {QColor(233, 30, 99), QColor(248, 187, 208)},  // Pink on pale pink
+        {QColor(0, 188, 212), QColor(179, 229, 252)},  // Cyan on pale cyan
+        {QColor(96, 125, 139), QColor(207, 216, 220)}, // Blue Grey on pale blue grey
+        {QColor(139, 195, 74), QColor(220, 237, 200)}, // Light Green on pale green
+        {QColor(255, 193, 7), QColor(255, 236, 179)},  // Amber on pale amber
+        {QColor(156, 39, 176), QColor(225, 190, 231)}, // Purple on pale purple
+        {QColor(121, 85, 72), QColor(215, 204, 200)}   // Brown on pale brown
     };
 
     QStringList mKeyTotal;
-    QStringList mKeyFind;
+    QStringList mKeyFinds;
     void updateKeyTotal()
     {
         mKeyTotal.clear();
@@ -44,9 +44,9 @@ private:
         {
             mKeyTotal.append(mKeys);
         }
-        if (!mKeyFind.isEmpty())
+        if (!mKeyFinds.isEmpty())
         {
-            mKeyTotal.append(mKeyFind);
+            mKeyTotal.append(mKeyFinds);
         }
     }
 
@@ -66,83 +66,117 @@ public:
 
         QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &opt);
         QFont fontKeyWord = opt.font;
-        fontKeyWord.setBold(bold);
+        // fontKeyWord.setBold(bold);
 
         painter->setFont(opt.font);
-        int x = textRect.left();
-        int y = textRect.top() + (textRect.height() + painter->fontMetrics().ascent() - painter->fontMetrics().descent()) / 2;
+        QFontMetrics fm = painter->fontMetrics();
+        int x0 = textRect.left();
+        int y = textRect.top() + (textRect.height() + fm.ascent() - fm.descent()) / 2;
 
-        QString remaining = text;
+        // Draw the full base text first (so highlights can be painted on top)
+        painter->setPen(opt.palette.text().color());
+        painter->drawText(x0, y, text);
 
-        while (!remaining.isEmpty())
+        // Helper match record
+        struct Match
         {
-            int firstMatchPos = -1;
-            int matchLength = 0;
-            int matchedIndex = -1;
+            int start;
+            int length;
+            QColor textColor;
+            QColor bgColor;
+        };
+        QList<Match> matches;
 
-            // Find the earliest keyword match
-            for (int i = 0; i < mKeyTotal.size(); ++i)
+        // 1) Collect mKeys matches and paint them (first pass)
+        for (int k = 0; k < mKeys.size(); ++k)
+        {
+            const QString &kw = mKeys.at(k);
+            if (kw.isEmpty())
+                continue;
+            int pos = 0;
+            while (true)
             {
-                const QString &kw = mKeyTotal[i];
-                int idx = remaining.indexOf(kw, 0, Qt::CaseInsensitive);
-                if (idx >= 0 && (firstMatchPos == -1 || idx < firstMatchPos))
-                {
-                    firstMatchPos = idx;
-                    matchLength = kw.length();
-                    matchedIndex = i;
-                }
+                int idx = text.indexOf(kw, pos, Qt::CaseInsensitive);
+                if (idx < 0)
+                    break;
+                Match m;
+                m.start = idx;
+                m.length = kw.length();
+
+                int colorIndex = k % mKeyFilterColors.size();
+                m.textColor = mKeyFilterColors[colorIndex].first;
+                m.bgColor = Qt::transparent; // Current don't use background color
+
+                matches.append(m);
+                pos = idx + m.length;
             }
+        }
 
-            if (firstMatchPos == -1)
-            {
-                painter->setPen(opt.palette.text().color());
-                painter->drawText(x, y, remaining);
-                break;
-            }
+        // Sort matches by start so drawing is left-to-right
+        std::sort(matches.begin(), matches.end(), [](const Match &a, const Match &b)
+                  { return a.start < b.start; });
 
-            // Draw text before match
-            QString before = remaining.left(firstMatchPos);
-            if (!before.isEmpty())
-            {
-                painter->setPen(opt.palette.text().color());
-                painter->drawText(x, y, before);
-                x += painter->fontMetrics().horizontalAdvance(before);
-            }
-
-            // Draw matched word with highlight
-            QString match = remaining.mid(firstMatchPos, matchLength);
-            QColor textColor = QColorConstants::Gray;
-            QColor bgColor = Qt::transparent;
-
-            if (matchedIndex >= 0 && matchedIndex < mKeyFilterColors.size())
-            {
-                textColor = mKeyFilterColors[matchedIndex].first;
-                // bgColor = mKeyFilterColors[matchedIndex].second;
-            }
-
-            // Check if match is in mKeyFind for special highlight
-            int findIdx = mKeyFind.indexOf(match, 0, Qt::CaseInsensitive);
-            if (findIdx != -1 && findIdx < mKeyFindColors.size())
-            {
-                textColor = mKeyFindColors[findIdx].first;
-                bgColor = mKeyFindColors[findIdx].second;
-            }
-
-            int width = painter->fontMetrics().horizontalAdvance(match);
+        // Paint mKeys highlights (background + text)
+        for (const Match &m : matches)
+        {
+            int x = x0 + fm.horizontalAdvance(text.left(m.start));
+            int width = fm.horizontalAdvance(text.mid(m.start, m.length));
             QRect highlightRect(x, textRect.top(), width, textRect.height());
-
-            if (bgColor != Qt::transparent)
-            {
-                painter->fillRect(highlightRect, bgColor);
-            }
-
+            if (m.bgColor.isValid() && m.bgColor != Qt::transparent)
+                painter->fillRect(highlightRect, m.bgColor);
+            painter->setPen(m.textColor.isValid() ? m.textColor : opt.palette.text().color());
             painter->setFont(fontKeyWord);
-            painter->setPen(textColor);
-            painter->drawText(x, y, match);
+            painter->drawText(x, y, text.mid(m.start, m.length));
             painter->setFont(opt.font);
+        }
 
-            x += width;
-            remaining = remaining.mid(firstMatchPos + matchLength);
+        // 2) Collect mKeyFinds matches and paint them over (second pass)
+        QList<Match> findMatches;
+        for (int k = 0; k < mKeyFinds.size(); ++k)
+        {
+            const QString &kw = mKeyFinds.at(k);
+            if (kw.isEmpty())
+                continue;
+            int pos = 0;
+            while (true)
+            {
+                int idx = text.indexOf(kw, pos, Qt::CaseInsensitive);
+                if (idx < 0)
+                    break;
+                Match m;
+                m.start = idx;
+                m.length = kw.length();
+                if (!mKeyFindColors.isEmpty())
+                {
+                    int colorIndex = k % mKeyFindColors.size();
+                    m.textColor = mKeyFindColors[colorIndex].first;
+                    m.bgColor = mKeyFindColors[colorIndex].second;
+                }
+                else
+                {
+                    m.textColor = opt.palette.text().color();
+                    m.bgColor = Qt::transparent;
+                }
+                findMatches.append(m);
+                pos = idx + m.length;
+            }
+        }
+
+        std::sort(findMatches.begin(), findMatches.end(), [](const Match &a, const Match &b)
+                  { return a.start < b.start; });
+
+        // Paint mKeyFinds highlights (overrides previous)
+        for (const Match &m : findMatches)
+        {
+            int x = x0 + fm.horizontalAdvance(text.left(m.start));
+            int width = fm.horizontalAdvance(text.mid(m.start, m.length));
+            QRect highlightRect(x, textRect.top(), width, textRect.height());
+            if (m.bgColor.isValid() && m.bgColor != Qt::transparent)
+                painter->fillRect(highlightRect, m.bgColor);
+            painter->setPen(m.textColor.isValid() ? m.textColor : opt.palette.text().color());
+            painter->setFont(fontKeyWord);
+            painter->drawText(x, y, text.mid(m.start, m.length));
+            painter->setFont(opt.font);
         }
 
         painter->restore();
@@ -150,13 +184,21 @@ public:
 
     void setKeyWords(const QStringList keyWords) override
     {
-        mKeys = keyWords;
+        mKeys.clear();
+        if (!keyWords.isEmpty())
+        {
+            mKeys.append(keyWords);
+        }
         updateKeyTotal();
     }
 
-    void setKeyFind(const QStringList keyFind)
+    void setKeyFind(const QStringList keyWords)
     {
-        mKeyFind = keyFind;
+        mKeyFinds.clear();
+        if (!keyWords.isEmpty())
+        {
+            mKeyFinds.append(keyWords);
+        }
         updateKeyTotal();
     }
 

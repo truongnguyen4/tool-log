@@ -116,8 +116,8 @@ void UiHandler::markLog(QTableWidgetItem *item)
         mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LINE, itemLine);
         mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TIME, UtilHelper::createTableItem(log.getTime(), Qt::AlignCenter));
         mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, UtilHelper::createTableItem(log.getPid(), Qt::AlignCenter));
-        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft));
-        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft));
+        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft | Qt::AlignVCenter));
+        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft | Qt::AlignVCenter));
 
         mUi->table_logmark->setSortingEnabled(true); // enable sorting to sort table logmark
         mUi->table_logmark->sortItems(Constant::TableLogMark::COL_LINE, Qt::SortOrder::AscendingOrder);

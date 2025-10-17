@@ -83,10 +83,11 @@ void MainWindow::onStart()
     // Data logic
     const QString filePath = ui->file->text().trimmed();
     const QString deviceId = ui->device_ids->currentText().trimmed();
-    if (deviceId.isEmpty())
+    if (deviceId.isEmpty() || filePath.isEmpty())
     {
         return;
     }
+    ui->table_logs->clearContents();
     const int errorCode = mDataHandler.startWatchLog(filePath, deviceId);
     NotificationHelper::showError(errorCode);
     if (errorCode != MainWindow::SUCCESS)
