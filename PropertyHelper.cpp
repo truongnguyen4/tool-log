@@ -2,9 +2,7 @@
 #include "ProcessHelper.hpp"
 #include <QList>
 #include "Logger.hpp"
-#include "NotificationHelper.hpp"
-
-
+#include "UtilHelper.hpp"
 
 void PropertyHelper::setProperties(const QList<Property> properties, const QString deviceId)
 {
@@ -17,39 +15,22 @@ void PropertyHelper::setProperties(const QList<Property> properties, const QStri
 void PropertyHelper::setProperty(const Property property, const QString deviceId)
 {
     QStringList command = {"-s", deviceId, "shell", "setprop", property.getName(), property.getValue()};
-    int exitCode = 0;
-    QString output = ProcessHelper::runShellCommand("adb", command, exitCode);
-    if (exitCode != 0)
-    {
-        NotificationHelper::showExitCode();
-        return;
-    }
+    QString output = mProcessHelper->runShellCommand("adb", command);
 }
 
 void PropertyHelper::loadProperties(const QString deviceId)
 {
     Logger::d(TAG, QString("loadProperties: deviceId = %1").arg(deviceId));
-    PropertyHelper::mListProperties.clear();
-    Property::static_line = 0;
 
     QStringList command = {"-s", deviceId, "shell", "getprop"};
-    int exitCode = 0;
-    QString output = ProcessHelper::runShellCommand("adb", command, exitCode);
-
-    if (exitCode != 0)
-    {
-        Logger::e(TAG, QString("Failed to get properties for device %1, exitCode: %2").arg(deviceId).arg(exitCode));
-        NotificationHelper::showExitCode();
-        return;
-    }
-
+    QString output = mProcessHelper->runShellCommand("adb", command);
     const QStringList lines = output.split('\n', Qt::SkipEmptyParts);
     for (const QString &line : lines)
     {
         Property property = PropertyHelper::convertToProperty(line.trimmed());
         if (!property.getName().isEmpty())
         {
-            PropertyHelper::mListProperties.append(property);
+            PropertyHelper::getInstance()->mListObjs.append(property);
         }
     }
 }
@@ -65,28 +46,13 @@ Property PropertyHelper::convertToProperty(const QString line)
     return Property();
 }
 
-void PropertyHelper::filterProperty(QList<Property> &properties, const QStringList names)
+void PropertyHelper::filterProperties()
 {
-    Logger::d(TAG, "filterProperty, names = " + names.join(", "));
-
-    for (Property &property : properties)
+    Logger::d(TAG, "filterProperty, mProps = " + mListKeys.join(", "));
+    for (Property &property : mListObjs)
     {
-        if (names.empty())
-        {
-            property.setIsHidden(false);
-        }
-        else
-        {
-            bool isHidden = true;
-            for (const QString &name : names)
-            {
-                if (property.getName().contains(name, Qt::CaseInsensitive))
-                {
-                    isHidden = false;
-                    break;
-                }
-            }
-            property.setIsHidden(isHidden);
-        }
+        property.setHidden(false);
+        mUtilHelper->updateHidden<Property>(property, property.getName(), mListKeys, andOp);
     }
 }
+

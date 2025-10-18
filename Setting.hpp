@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 #include <QString>
+#include <QStringList>
 class Setting
 {
 private:
@@ -9,10 +10,11 @@ private:
     QString name;
     QString value;
     bool isHidden = false;
+
 public:
-    Setting() : line(++static_line) {};
-    Setting(QString group, QString name, QString value) : group(group), name(name), value(value), line(++static_line) {};
-    inline static int static_line = 0;
+    inline static int static_id = 0;
+    Setting() : line(++static_id) {};
+    Setting(QString group, QString name, QString value) : group(group), name(name), value(value), line(++static_id) {};
     void setGroup(const QString group)
     {
         this->group = group;
@@ -37,11 +39,11 @@ public:
     {
         return value;
     }
-    bool getIsHidden() const
+    bool getHidden() const
     {
         return isHidden;
     }
-    void setIsHidden(const bool isHidden)
+    void setHidden(const bool isHidden)
     {
         this->isHidden = isHidden;
     }
@@ -50,8 +52,22 @@ public:
         return line;
     }
 
-    const QString toString() {
-        return "line: " + QString::number(getLine()) + ", group: " + group + ", name: " + name + ", value: " + value + ", isHidden: " + QString::number(isHidden);
+    const QString toString()
+    {
+        return QString("line: %1, group: %2, name: %3, value: %4, isHidden: %5")
+            .arg(getLine())
+            .arg(group)
+            .arg(name)
+            .arg(value)
+            .arg(isHidden ? QString("true") : QString("false"));
+    }
+    QStringList getListData() const
+    {
+        return QStringList{
+            QString::number(line),
+            group,
+            name,
+            value};
     }
 };
 

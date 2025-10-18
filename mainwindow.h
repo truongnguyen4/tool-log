@@ -23,20 +23,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    static constexpr int SUCCESS = 0;
-    static constexpr int ERROR_FILE_PATH = -1;
-    static constexpr int ERROR_DEVICE_ID = -2;
-    static constexpr int ERROR_UNKNOWN = -3;
-    static QStringList simulateDevices;
 
 private:
     static const QString TAG;
     Ui::MainWindow *ui;
     UiHandler *mUiHandler = UiHandler::getInstance();
     DataHandler *mDataHandler = DataHandler::getInstance();
-    SettingDialog mSettingDialog;
-    NotificationDialog mNotificationDialog;
-    ProcessHelper *mProcessHandler = ProcessHelper::getInstance();
     class MainWindowDeviceChangeListener : public ProcessHelper::DeviceChangeListener
     {
     public:
@@ -67,10 +59,16 @@ private:
     void onStart();
     void onStop();
     void onClear();
+    void onSaveLog();
+    void onStartKernel();
     
     void onFilterLog();
     void onFilterProperties();
     void onFilterSettings();
+
+    void onRefreshLog();
+    void onRefreshSetting();
+    void onRefreshProperty();
     
     void onFind();
     void onSetTagHighLight();
@@ -79,10 +77,6 @@ private:
     void onMarkItem(QTableWidgetItem *item);
     void onFocusItem(QTableWidgetItem *item);
     void onClearMark();
-    
-    void onRefreshLog();
-    void onRefreshSettingProperty();
-    void onRefreshDeviceIds();
 
     void onChangeConnectDevices(QStringList deviceIds, const bool isConnected);
     void onShowItem(QTableWidgetItem *item);

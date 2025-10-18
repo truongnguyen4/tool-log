@@ -7,16 +7,16 @@ class HighlightCell : public HighlightDelegate
 {
 private:
     QList<QPair<QColor, QColor>> mColors = {
-        { QColorConstants::LightGray, QColorConstants::White },
-        { QColorConstants::DarkBlue, QColorConstants::White },
-        { QColorConstants::DarkGreen, QColorConstants::White },
-        { QColorConstants::DarkRed, QColorConstants::White },
-        { QColorConstants::Red, QColorConstants::White }
-    };
+        {QColorConstants::LightGray, QColorConstants::White},
+        {QColorConstants::DarkBlue, QColorConstants::White},
+        {QColorConstants::DarkGreen, QColorConstants::White},
+        {QColorConstants::DarkRed, QColorConstants::White},
+        {QColorConstants::Red, QColorConstants::White}};
+
 public:
-    HighlightCell(QObject* parent = nullptr) 
+    HighlightCell(QObject *parent = nullptr)
         : HighlightDelegate(parent) {}
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         QString text = index.data().toString();
 
@@ -32,8 +32,10 @@ public:
         QFont fontKeyWord = opt.font;
         fontKeyWord.setBold(bold);
 
-        for (int i = 0; i < mKeys.size(); ++i) {
-            if (text == mKeys[i]) {
+        for (int i = 0; i < mKeys.size(); ++i)
+        {
+            if (text == mKeys[i])
+            {
                 QColor bgColor = (i < mColors.size()) ? mColors[i].first : QColorConstants::Gray;
                 painter->setFont(fontKeyWord);
                 painter->fillRect(opt.rect, bgColor);
@@ -45,20 +47,22 @@ public:
         }
         painter->restore();
     }
-    class Builder : public HighlightDelegate::Builder {
-        public:
-            Builder(QObject* parent = nullptr) : HighlightDelegate::Builder(parent)
-            {
-                delete mDelegate;
-                mDelegate = new HighlightCell(parent);
-            }
-            Builder& setBold(const bool value) override
-            {
-                mDelegate->bold = value;
-                return *this;
-            }
-            HighlightCell* build() override {
-                return static_cast<HighlightCell*>(mDelegate);
+    class Builder : public HighlightDelegate::Builder
+    {
+    public:
+        Builder(QObject *parent = nullptr) : HighlightDelegate::Builder(parent)
+        {
+            delete mDelegate;
+            mDelegate = new HighlightCell(parent);
+        }
+        Builder &setBold(const bool value) override
+        {
+            mDelegate->bold = value;
+            return *this;
+        }
+        HighlightCell *build() override
+        {
+            return static_cast<HighlightCell *>(mDelegate);
         };
     };
 };

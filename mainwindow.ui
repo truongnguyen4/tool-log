@@ -66,6 +66,9 @@
       </item>
       <item>
        <widget class="QTabWidget" name="tabWidget">
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
         <property name="currentIndex">
          <number>0</number>
         </property>
@@ -100,6 +103,20 @@
                   <property name="icon">
                    <iconset resource="resource.qrc">
                     <normaloff>:/icons/play.png</normaloff>:/icons/play.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="start_kernel">
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resource.qrc">
+                    <normaloff>:/icons/start_kernel.png</normaloff>:/icons/start_kernel.png</iconset>
                   </property>
                  </widget>
                 </item>
@@ -168,15 +185,16 @@
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout">
                   <item>
-                   <widget class="QLabel" name="label">
+                   <widget class="QPushButton" name="save_log">
                     <property name="focusPolicy">
                      <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="text">
                      <string/>
                     </property>
-                    <property name="pixmap">
-                     <pixmap resource="resource.qrc">:/icons/folder.png</pixmap>
+                    <property name="icon">
+                     <iconset resource="resource.qrc">
+                      <normaloff>:/icons/folder.png</normaloff>:/icons/folder.png</iconset>
                     </property>
                    </widget>
                   </item>
@@ -587,6 +605,11 @@
              <widget class="QTableWidget" name="table_setting">
               <column>
                <property name="text">
+                <string>Line</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
                 <string>Group</string>
                </property>
               </column>
@@ -630,6 +653,11 @@
             </item>
             <item>
              <widget class="QTableWidget" name="table_property">
+              <column>
+               <property name="text">
+                <string>Line</string>
+               </property>
+              </column>
               <column>
                <property name="text">
                 <string>Property</string>

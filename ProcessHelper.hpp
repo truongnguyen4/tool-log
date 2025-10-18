@@ -5,24 +5,46 @@
 #include <QThread>
 #include <QMutex>
 #include "Log.hpp"
-
+#include "LogHelper.hpp"
+#include <QTimer>
+#include <memory>
 class ProcessHelper
 {
 private:
-    static const QString TAG;
+    static const inline QString TAG = "ProcessHelper";
     static inline ProcessHelper *instance = nullptr;
     ProcessHelper();
+    void detectDevices();
+    void receiveRealTimeLog();
 
     static inline QProcess *processReadLogCat = new QProcess(nullptr);
     static inline QProcess *mProcessRealtimeLog = new QProcess(nullptr);
+    QTimer *mTimerUpdateTable = new QTimer();
+    QThread *mThreadDetectDevices = QThread::create([=]()
+                                                    { detectDevices(); });
+    QThread *mThreadRealTimeLog = QThread::create([=]()
+                                                  { receiveRealTimeLog(); });
+
+    std::shared_ptr<QByteArray> mBufferLogs = std::make_shared<QByteArray>();
+
     QMutex mtxCurrentDeviceIds;
-    void detectDevices();
-    QThread *mThreadDetectDevices;
+    QMutex mtxLogBuffer;
+
+    LogHelper *mLogHelper = LogHelper::getInstance();
+
     QStringList mCurrentDeviceIds;
-    void insertLogToTable(Log log);
 
 public:
-    static QString runShellCommand(const QString program, const QStringList command_args, int &exitCode);
+    static inline int mLastLogId = 0;
+    static ProcessHelper *getInstance()
+    {
+        if (!instance)
+        {
+            instance = new ProcessHelper();
+        }
+        return instance;
+    }
+    QString runShellCommand(const QString program, const QStringList command_args);
     QStringList getDeviceIds();
     void clearLogcat(const QString deviceId);
     void startWatchLog(const QString filePath, const QString deviceId);
@@ -36,14 +58,6 @@ public:
     void stop();
     void registerDeviceChangeListener(DeviceChangeListener *listener);
     void unregisterDeviceChangeListener(DeviceChangeListener *listener);
-    static ProcessHelper *getInstance()
-    {
-        if (!instance)
-        {
-            instance = new ProcessHelper();
-        }
-        return instance;
-    }
 
 private:
     QList<DeviceChangeListener *> mDeviceChangeListeners;

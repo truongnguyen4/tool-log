@@ -12,6 +12,7 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
+
 set(CONTROLLER
     UiHandler.hpp
     UiHandler.cpp
@@ -38,7 +39,6 @@ set(MODEL
 
 set(UTIL
     Log.hpp
-    Log.cpp
     Logger.hpp
     NotificationDialog.hpp
     NotificationDialog.cpp
@@ -46,6 +46,9 @@ set(UTIL
     SettingDialog.cpp
     Setting.hpp
     Property.hpp
+    QPushButtonDefault.h
+    QLineEditDefault.h
+    UtilHelper.hpp
 )
 
 set(PROJECT_SOURCES
@@ -62,11 +65,7 @@ set(PROJECT_SOURCES
 qt_add_executable(tool-log
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
-    QPushButtonDefault.h
-    QLineEditDefault.h
     resource.qrc
-    UtilHelper.hpp
-
 )
 
 target_link_libraries(tool-log PRIVATE Qt6::Widgets)

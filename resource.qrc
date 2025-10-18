@@ -10,5 +10,6 @@
         <file>icons/folder.png</file>
         <file>icons/device.png</file>
         <file>icons/remove-bookmark.png</file>
+        <file>icons/start_kernel.png</file>
     </qresource>
 </RCC>

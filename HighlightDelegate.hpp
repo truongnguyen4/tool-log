@@ -5,10 +5,10 @@
 #include <QPainter>
 #include <QTextLayout>
 
-class HighlightDelegate : public QStyledItemDelegate 
+class HighlightDelegate : public QStyledItemDelegate
 {
 public:
-    HighlightDelegate(QObject* parent = nullptr) 
+    HighlightDelegate(QObject *parent = nullptr)
         : QStyledItemDelegate(parent) {}
 
     bool bold = false;
@@ -19,13 +19,14 @@ public:
         mKeys = keys;
     }
 
-    class Builder {
-        public:
-            HighlightDelegate* mDelegate = nullptr;
-            QObject* mParent = nullptr;
-            Builder(QObject* parent = nullptr) : mParent(parent) {}
-            virtual Builder& setBold(const bool value) = 0;
-            virtual HighlightDelegate* build() = 0;
-        };
+    class Builder
+    {
+    public:
+        HighlightDelegate *mDelegate = nullptr;
+        QObject *mParent = nullptr;
+        Builder(QObject *parent = nullptr) : mParent(parent) {}
+        virtual Builder &setBold(const bool value) = 0;
+        virtual HighlightDelegate *build() = 0;
+    };
 };
 #endif // HIGLIGHTDELEGATE_H

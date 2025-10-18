@@ -3,15 +3,11 @@
 #include <QDebug>
 #include "Log.hpp"
 #include <QTableWidgetItem>
-#include "NotificationHelper.hpp"
 #include <QDateTime>
 #include "Logger.hpp"
-#include "Property.hpp"
-#include "Setting.hpp"
 #include <QDateTime>
 
 QString const MainWindow::TAG = "MainWindow";
-QStringList MainWindow::simulateDevices = {};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -25,30 +21,184 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::init()
+{
+    mUiHandler->initUi(ui);
+    ProcessHelper::getInstance()->registerDeviceChangeListener(mDeviceListener);
+
+    connect(ui->file, &QLineEdit::returnPressed, this, &MainWindow::onRefreshLog);
+    connect(ui->pid, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->level, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+
+    connect(ui->property_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterProperties);
+    connect(ui->setting_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterSettings);
+
+    connect(ui->refresh, &QPushButton::pressed, this, [this]() {
+        onRefreshProperty();
+        onRefreshSetting();
+    });
+
+    ui->find->installEventFilter(this);
+    ui->pid->installEventFilter(this);
+    ui->tag->installEventFilter(this);
+    ui->msg->installEventFilter(this);
+    ui->level->installEventFilter(this);
+    ui->devices->installEventFilter(this);
+    ui->property_filter->installEventFilter(this);
+    ui->setting_filter->installEventFilter(this);
+
+    connect(ui->table_logs, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
+    connect(ui->table_logs, &QTableWidget::itemDoubleClicked, this, &MainWindow::onMarkItem);
+    connect(ui->table_logmark, &QTableWidget::itemClicked, this, &MainWindow::onFocusItem);
+    connect(ui->find, &QLineEdit::returnPressed, this, &MainWindow::onFind);
+    connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onSetTagHighLight);
+    connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onSetMsgHighLight);
+    connect(ui->start, &QPushButton::pressed, this, &MainWindow::onStart);
+    connect(ui->clear, &QPushButton::pressed, this, &MainWindow::onClear);
+    connect(ui->setting, &QPushButton::pressed, this, &MainWindow::onSettings);
+    connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
+    connect(ui->save_log, &QPushButton::pressed, this, &MainWindow::onSaveLog);
+    connect(ui->start_kernel, &QPushButton::pressed, this, &MainWindow::onStartKernel);
+    connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::onStop);
+}
+
+void MainWindow::onStart()
+{
+    // Data logic
+    const QString filePath = ui->file->text().trimmed();
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty() || filePath.isEmpty())
+    {
+        return;
+    }
+    isWatching = !isWatching;
+    Logger::d(TAG, (QString(isWatching ? "Start" : "Stop")) + " watching successfull");
+    mUiHandler->startWatching(isWatching);
+    mDataHandler->startWatchLogRealTime(deviceId, isWatching);
+}
+
+void MainWindow::onStop()
+{
+    Logger::d(TAG, "Closing Application...");
+    ProcessHelper::getInstance()->stop();
+}
+
+void MainWindow::onClear()
+{
+    mUiHandler->clearLogcat();
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty())
+    {
+        return;
+    }
+    mDataHandler->clearLogcat(deviceId);
+}
+
+void MainWindow::onSaveLog()
+{
+    const QString filePath = ui->file->text().trimmed();
+    if (filePath.isEmpty())
+    {
+        return;
+    }
+    mDataHandler->saveLog(filePath);
+}
+
+void MainWindow::onStartKernel()
+{
+    const QString filePath = ui->file->text().trimmed();
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty() || filePath.isEmpty())
+    {
+        return;
+    }
+    isWatching = !isWatching;
+    Logger::d(TAG, (QString(isWatching ? "Start" : "Stop")) + " watching successfull");
+    mUiHandler->startWatchingKernel(isWatching);
+}
+
 void MainWindow::onFilterLog()
 {
     QString pid = ui->pid->text().trimmed();
     QString tag = ui->tag->text().trimmed();
     QString msg = ui->msg->text().trimmed();
     QString level = ui->level->text().trimmed();
-    mDataHandler->addKey(pid, tag, msg, level);
     mDataHandler->filterLogs(pid, tag, msg, level);
     mUiHandler->updateLogVisibility();
 }
 
-void MainWindow::onShowItem(QTableWidgetItem *item)
+void MainWindow::onFilterProperties()
 {
-    mUiHandler->updateLogShow(item);
+    QString name = ui->property_filter->text().trimmed();
+    mDataHandler->filterProperties(name);
+    mUiHandler->updatePropertiesVisibility();
 }
 
-void MainWindow::onMarkItem(QTableWidgetItem *item)
+void MainWindow::onFilterSettings()
 {
-    mUiHandler->markLog(item);
+    QString name = ui->setting_filter->text().trimmed();
+    mDataHandler->filterSettings(name);
+    mUiHandler->updateSettingsVisibility();
 }
 
-void MainWindow::onFocusItem(QTableWidgetItem *item)
+void MainWindow::onRefreshLog()
 {
-    mUiHandler->focusLog(item);
+    // Data logic
+    QString filePath = ui->file->text().trimmed();
+    mDataHandler->loadLogs(filePath);
+    mUiHandler->loadLogs();
+    onSetTagHighLight();
+    onSetMsgHighLight();
+    onFind();
+}
+
+void MainWindow::onRefreshSetting()
+{
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty())
+    {
+        return;
+    }
+    mDataHandler->loadSettings(deviceId);
+
+    // Load all Settings in the fist time or only update them
+    if (!mUiHandler->isFirstLoadSettings)
+    {
+        mUiHandler->loadSettings();
+        mUiHandler->isFirstLoadSettings = true;
+    }
+    else
+    {
+        mUiHandler->updateValueSettings();
+    }
+}
+
+void MainWindow::onRefreshProperty()
+{
+    const QString deviceId = ui->device_ids->currentText().trimmed();
+    if (deviceId.isEmpty())
+    {
+        return;
+    }
+    mDataHandler->loadProperties(deviceId);
+    // Load all Properties in the fist time or only update them
+    if (!mUiHandler->isFirstLoadProperties)
+    {
+        mUiHandler->loadProperties();
+        mUiHandler->isFirstLoadProperties = true;
+    }
+    else
+    {
+        mUiHandler->updateValueProperties();
+    }
+}
+
+void MainWindow::onFind()
+{
+    QString find = ui->find->text();
+    mUiHandler->highlightFind(find);
 }
 
 void MainWindow::onSetTagHighLight()
@@ -63,51 +213,14 @@ void MainWindow::onSetMsgHighLight()
     mUiHandler->highlightMsg(msg);
 }
 
-void MainWindow::onRefreshLog()
+void MainWindow::onMarkItem(QTableWidgetItem *item)
 {
-    // UI logic
-    ui->table_logmark->setRowCount(0);
-
-    // Data logic
-    QString filePath = ui->file->text().trimmed();
-    mDataHandler->refreshLog(filePath);
-    mUiHandler->loadLogs();
-    onSetTagHighLight();
-    onSetMsgHighLight();
-    onFind();
+    mUiHandler->toggleMarkLog(item);
 }
 
-void MainWindow::onStart()
+void MainWindow::onFocusItem(QTableWidgetItem *item)
 {
-    // Data logic
-    const QString filePath = ui->file->text().trimmed();
-    const QString deviceId = ui->device_ids->currentText().trimmed();
-    if (deviceId.isEmpty() || filePath.isEmpty())
-    {
-        return;
-    }
-
-    isWatching = !isWatching;
-    Logger::d(TAG, (QString(isWatching ? "Start" : "Stop")) + " watching successfull");
-    mUiHandler->startWatching(isWatching);
-    mDataHandler->startWatchLogRealTime(deviceId);
-}
-
-void MainWindow::onClear()
-{
-    mUiHandler->clearLogcat();
-    const QString deviceId = ui->device_ids->currentText().trimmed();
-    if (deviceId.isEmpty())
-    {
-        return;
-    }
-    mDataHandler->clearLogcat(deviceId);
-}
-
-void MainWindow::onSettings()
-{
-    SettingDialog settings(this, ui);
-    settings.exec();
+    mUiHandler->focusLog(item);
 }
 
 void MainWindow::onClearMark()
@@ -132,6 +245,11 @@ void MainWindow::onUpPressed(QObject *obj)
         static_cast<QLineEdit *>(obj)->setText(key);
     }
 }
+void MainWindow::onSettings()
+{
+    SettingDialog settings(this, ui);
+    settings.exec();
+}
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
@@ -139,7 +257,13 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     if (QLineEditClass && event->type() == QEvent::KeyPress)
     {
         QString objName = obj->objectName();
-        if (objName == ui->find->objectName() || objName == ui->msg->objectName() || objName == ui->tag->objectName() || objName == ui->pid->objectName() || objName == ui->level->objectName() || objName == ui->property_filter->objectName() || objName == ui->setting_filter->objectName())
+        if (objName == ui->find->objectName() 
+            || objName == ui->msg->objectName() 
+            || objName == ui->tag->objectName() 
+            || objName == ui->pid->objectName() 
+            || objName == ui->level->objectName() 
+            || objName == ui->property_filter->objectName() 
+            || objName == ui->setting_filter->objectName())
         {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
             if (keyEvent->key() == Qt::Key_Down)
@@ -154,7 +278,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             }
         }
     }
-
     return QWidget::eventFilter(obj, event);
 }
 
@@ -163,102 +286,7 @@ void MainWindow::onChangeConnectDevices(QStringList deviceIds, const bool isConn
     mUiHandler->refreshDeviceIds(deviceIds, isConnected);
 }
 
-void MainWindow::onStop()
+void MainWindow::onShowItem(QTableWidgetItem *item)
 {
-    Logger::d(TAG, "Closing Application...");
-    mProcessHandler->stop();
-}
-
-void MainWindow::onFind()
-{
-    QString find = ui->find->text();
-    mDataHandler->addKey(find);
-    mUiHandler->highlightFind(find);
-}
-
-void MainWindow::onRefreshSettingProperty()
-{
-    const QString deviceId = ui->device_ids->currentText().trimmed();
-    if (deviceId.isEmpty())
-    {
-        return;
-    }
-    mDataHandler->loadProperties(deviceId);
-    mDataHandler->loadSettings(deviceId);
-
-    // Load all Settings in the fist time or only update them
-    if (!mUiHandler->isFirstLoadSettings)
-    {
-        mUiHandler->loadSettings();
-        mUiHandler->isFirstLoadSettings = true;
-    }
-    else
-    {
-        mUiHandler->updateValueSettings();
-    }
-
-    // Load all Properties in the fist time or only update them
-    if (!mUiHandler->isFirstLoadProperties)
-    {
-        mUiHandler->loadProperties();
-        mUiHandler->isFirstLoadProperties = true;
-    }
-    else
-    {
-        mUiHandler->updateValueProperties();
-    }
-}
-
-void MainWindow::onFilterSettings()
-{
-    QString name = ui->setting_filter->text().trimmed();
-    mDataHandler->addKey("", name);
-    mDataHandler->filterSettings(name);
-    mUiHandler->updateSettingsVisibility();
-}
-
-void MainWindow::onFilterProperties()
-{
-    QString name = ui->property_filter->text().trimmed();
-    mDataHandler->addKey(name, "");
-    mDataHandler->filterProperties(name);
-    mUiHandler->updatePropertiesVisibility();
-}
-
-void MainWindow::init()
-{
-    mUiHandler->initUi(ui);
-    mProcessHandler->registerDeviceChangeListener(mDeviceListener);
-
-    connect(ui->file, &QLineEdit::returnPressed, this, &MainWindow::onRefreshLog);
-    connect(ui->pid, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
-    connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
-    connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
-    connect(ui->level, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
-
-    connect(ui->property_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterProperties);
-    connect(ui->setting_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterSettings);
-
-    connect(ui->refresh, &QPushButton::pressed, this, &MainWindow::onRefreshSettingProperty);
-
-    ui->find->installEventFilter(this);
-    ui->pid->installEventFilter(this);
-    ui->tag->installEventFilter(this);
-    ui->msg->installEventFilter(this);
-    ui->level->installEventFilter(this);
-    ui->devices->installEventFilter(this);
-    ui->property_filter->installEventFilter(this);
-    ui->setting_filter->installEventFilter(this);
-
-    connect(ui->table_logs, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
-    connect(ui->table_logs, &QTableWidget::itemDoubleClicked, this, &MainWindow::onMarkItem);
-    connect(ui->table_logmark, &QTableWidget::itemClicked, this, &MainWindow::onFocusItem);
-    connect(ui->find, &QLineEdit::returnPressed, this, &MainWindow::onFind);
-    connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onSetTagHighLight);
-    connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onSetMsgHighLight);
-    connect(ui->start, &QPushButton::pressed, this, &MainWindow::onStart);
-    connect(ui->clear, &QPushButton::pressed, this, &MainWindow::onClear);
-    connect(ui->setting, &QPushButton::pressed, this, &MainWindow::onSettings);
-    connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
-    connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::onStop);
+    mUiHandler->updateLogShow(item);
 }

@@ -7,13 +7,23 @@
 #include "Property.hpp"
 #include "Setting.hpp"
 #include "LogHelper.hpp"
+#include "PropertyHelper.hpp"
+#include "SettingHelper.hpp"
 class DataHandler
 {
 private:
-    static const QString TAG;
-    FileHelper mFileLogHelper;
-    ProcessHelper *mProcessHandler = ProcessHelper::getInstance();
-    LogHelper mLogHelper;
+    static const inline QString TAG = "DataHandler";
+    static inline DataHandler *mDataHandler = nullptr;
+    DataHandler() {};
+
+    PropertyHelper *mPropertyHelper = PropertyHelper::getInstance();
+    LogHelper *mLogHelper = LogHelper::getInstance();
+    SettingHelper *mSettingHelper = SettingHelper::getInstance();
+    ProcessHelper *mProcessHelper = ProcessHelper::getInstance();
+    FileHelper *mFileHelper = FileHelper::getInstance();
+    UtilHelper *mUtilHelper = UtilHelper::getInstance();
+
+public:
     QStringList mListFind;
     QStringList mListMsg;
     QStringList mListTag;
@@ -28,10 +38,7 @@ private:
     int mLevelId = 0;
     int mPropertyId = 0;
     int mSettingId = 0;
-    static inline DataHandler* mDataHandler = nullptr;
-    DataHandler() {};
-public:
-    static DataHandler* getInstance()
+    static DataHandler *getInstance()
     {
         if (!mDataHandler)
         {
@@ -39,23 +46,23 @@ public:
         }
         return mDataHandler;
     }
-    void addKey(const QString &tag, const QString &msg, const QString &level, const QString &pid);
-    void addKey(const QString &find);
-    void addKey(const QString &property,const QString &setting);
 
     void filterLogs(const QString &tag, const QString &msg, const QString &level, const QString &pid);
     void filterSettings(const QString nameFilter);
     void filterProperties(const QString nameFilter);
 
-    void refreshLog(const QString &file);
-    void loadProperties(const QString deviceId);
+    void loadLogs(const QString &file);
     void loadSettings(const QString deviceId);
+    void loadProperties(const QString deviceId);
 
-    void startWatchLog(QString filePath, const QString deviceId);
-    void startWatchLogRealTime(const QString deviceId);
     void clearLogcat(const QString deviceId);
+    void startWatchLog(QString filePath, const QString deviceId);
+    void startWatchLogRealTime(const QString deviceId, const bool isWatching);
+
     QString previousKey(Ui::MainWindow *ui, QObject *obj);
     QString nextKey(Ui::MainWindow *ui, QObject *obj);
+
+    void saveLog(const QString filePath);
 };
 
 #endif // DATAHANDLER_H

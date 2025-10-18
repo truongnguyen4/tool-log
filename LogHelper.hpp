@@ -4,13 +4,18 @@
 #include <QString>
 #include "Log.hpp"
 #include <QRegularExpression>
+#include <QList>
+#include "UtilHelper.hpp"
 
 class LogHelper
 {
 private:
-    static const QRegularExpression logcatPattern;
-    static const QString TAG;
+    const QRegularExpression logcatPattern = QRegularExpression(
+        R"(^\s*(\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d+)\s+(\d+)\s+(\d+)\s+([A-Za-z])\s+(.+?)\s*:\s*(.*)$)",
+        QRegularExpression::CaseInsensitiveOption);
+    static const inline QString TAG = "LogHelper";
     static inline LogHelper *instance = nullptr;
+    UtilHelper *mUtilHelper = UtilHelper::getInstance();
 
 public:
     static LogHelper *getInstance()
@@ -21,25 +26,26 @@ public:
         }
         return instance;
     }
+    void clearLogs()
+    {
+        Log::static_id = 0;
+        mListObjs.clear();
+    }
 
-    QList<Log> mListLogs;
-    QStringList mTags;
-    QStringList mLevels;
-    QStringList mPids;
-    QStringList mMsgs;
-    bool tagAndOperation = false;
-    bool levelAndOperation = false;
-    bool pidAndOperation = false;
-    bool msgAndOperation = false;
-
-    void filterLogs(QList<Log> &logs);
+    QList<Log> mListObjs;
+    QStringList mListKeyTags;
+    QStringList mListKeyLevels;
+    QStringList mListPids;
+    QStringList mListMsgs;
+    bool tagAndOp = false;
+    bool levelAndOp = false;
+    bool pidAndOp = false;
+    bool msgAndOp = false;
 
     void updateHiddenLog(Log &log);
-    static void updateHiddenLogByTag(Log &log, const QStringList tags, const bool andOperation);
-    static void updateHiddenLogByMsg(Log &log, const QStringList messages, const bool andOperation);
-    static void updateHiddenLogByLevel(Log &log, const QStringList levels, const bool andOperation);
-    static void updateHiddenLogByPid(Log &log, const QStringList pids, const bool andOperation);
-    static Log convertToLog(const QString line);
+    void filterLogs();
+    Log convertToLog(const QString line);
+    QStringList getLogAsFile();
 };
 
 #endif // LOGHELPER_HPP

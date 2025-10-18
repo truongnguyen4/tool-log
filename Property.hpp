@@ -1,17 +1,20 @@
 #ifndef PROPERTY_H
 #define PROPERTY_H
 #include <QString>
+#include <QStringList>
+
 class Property
 {
 private:
-int line = 0;
-    QString name = "default";
-    QString value = "default";
+    int line = 0;
+    QString name;
+    QString value;
     bool isHidden = false;
+
 public:
-    Property() : line(++static_line) {};
-    Property(QString name, QString value) : name(name), value(value), line(++static_line) {};
-    inline static int static_line = 0;
+    Property() : line(++static_id) {};
+    Property(QString name, QString value) : name(name), value(value), line(++static_id) {};
+    inline static int static_id = 0;
     void setName(const QString name)
     {
         this->name = name;
@@ -28,11 +31,11 @@ public:
     {
         return value;
     }
-    bool getIsHidden() const
+    bool getHidden() const
     {
         return isHidden;
     }
-    void setIsHidden(const bool isHidden)
+    void setHidden(const bool isHidden)
     {
         this->isHidden = isHidden;
     }
@@ -40,8 +43,20 @@ public:
     {
         return line;
     }
-    QString toString() {
-        return "line: " + QString::number(getLine()) + ", name: " + name + ", value: " + value + ", isHidden: " + QString::number(isHidden);
+    QString toString()
+    {
+        return QStringLiteral("line: %1, name: %2, value: %3, isHidden: %4")
+            .arg(getLine())
+            .arg(name)
+            .arg(value)
+            .arg(isHidden ? QStringLiteral("true") : QStringLiteral("false"));
+    }
+    QStringList getListData() const
+    {
+        return QStringList{
+            QString::number(line),
+            name,
+            value};
     }
 };
 

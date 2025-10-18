@@ -1,18 +1,17 @@
 #include "ProcessHelper.hpp"
 #include <QProcess>
 #include "Logger.hpp"
-#include "mainwindow.h"
 #include <QThread>
 #include "NotificationHelper.hpp"
-
-QString const ProcessHelper::TAG = "ProcessHelper";
 
 void ProcessHelper::registerDeviceChangeListener(DeviceChangeListener *listener)
 {
     if (listener == nullptr)
     {
+        Logger::w(TAG, "Trying to register a null device change listener");
         return;
     }
+
     if (!mDeviceChangeListeners.contains(listener))
     {
         Logger::d(TAG, "Register new device change listener");
@@ -31,15 +30,18 @@ void ProcessHelper::unregisterDeviceChangeListener(DeviceChangeListener *listene
     mDeviceChangeListeners.removeAll(listener);
 }
 
-QString ProcessHelper::runShellCommand(const QString program, const QStringList args, int &exitCode)
+QString ProcessHelper::runShellCommand(const QString program, const QStringList args)
 {
     QProcess *process = new QProcess();
     process->start(program, args);
     process->waitForFinished();
 
     QString output = process->readAllStandardOutput();
-    exitCode = process->exitCode();
-
+    if (process->exitCode() != 0)
+    {
+        Logger::e(TAG, "Command failed: " + program + " " + args.join(" ") + "\nError: " + process->readAllStandardError());
+        NotificationHelper::showError(NotificationHelper::ERROR_PROCESS_SHELL);
+    }
     delete process;
 
     return output;
@@ -48,12 +50,7 @@ QString ProcessHelper::runShellCommand(const QString program, const QStringList 
 QStringList ProcessHelper::getDeviceIds()
 {
     QStringList deviceIds;
-    int exitCode = 0;
-    QString output = runShellCommand("adb", QStringList() << "devices", exitCode);
-    if (exitCode != 0)
-    {
-        NotificationHelper::showExitCode();
-    }
+    QString output = runShellCommand("adb", QStringList() << "devices");
     QStringList lines = output.split('\n', Qt::SkipEmptyParts);
     if (lines.length() > 1)
     {
@@ -67,7 +64,6 @@ QStringList ProcessHelper::getDeviceIds()
         }
     }
     return deviceIds;
-    // return MainWindow::simulateDevices;
 }
 
 void ProcessHelper::clearLogcat(const QString deviceId)
@@ -79,13 +75,7 @@ void ProcessHelper::clearLogcat(const QString deviceId)
     }
     Logger::d(TAG, "Clear logcat on DEVICE ID = " + deviceId);
     QStringList command = {"-s", deviceId, "logcat", "-c"};
-    int exitCode = 0;
-    runShellCommand("adb", command, exitCode);
-    if (exitCode != 0)
-    {
-        NotificationHelper::showExitCode();
-        return;
-    }
+    runShellCommand("adb", command);
 }
 
 void ProcessHelper::startWatchLog(const QString filePath, const QString deviceId)
@@ -99,15 +89,9 @@ void ProcessHelper::startWatchLog(const QString filePath, const QString deviceId
         return;
     }
 
-    if (deviceId.isEmpty())
+    if (deviceId.isEmpty() || !FileHelper::getInstance()->checkPath(filePath))
     {
-        Logger::d(TAG, "Can't start watching device due to DEVICE ID is empty.");
-        return;
-    }
-
-    if (!FileHelper::checkPath(filePath))
-    {
-        Logger::d(TAG, "Can't start watching log due to FILE PATH is invalid.");
+        Logger::w(TAG, "Invalid device ID or file path");
         return;
     }
 
@@ -118,32 +102,66 @@ void ProcessHelper::startWatchLog(const QString filePath, const QString deviceId
 
 ProcessHelper::ProcessHelper()
 {
-    mThreadDetectDevices = QThread::create([=]()
-                                           { detectDevices(); });
+    mTimerUpdateTable->setInterval(1000); // 1 second
+    mTimerUpdateTable->setSingleShot(false);
+    mTimerUpdateTable->start();
 
-    if (mThreadDetectDevices != nullptr)
-    {
-        Logger::d(TAG, "Start thread detect devices");
-        mThreadDetectDevices->start();
-    }
-    mProcessRealtimeLog->setProcessChannelMode(QProcess::MergedChannels);
-    auto buffer = std::make_shared<QByteArray>();
-    QObject::connect(mProcessRealtimeLog, &QProcess::readyReadStandardOutput, mProcessRealtimeLog, [this, buffer]()
+    // mThreadDetectDevices = QThread::create([=]() { detectDevices(); });
+    Logger::d(TAG, "Start thread detect devices");
+    mThreadDetectDevices->start();
+
+    Logger::d(TAG, "Start thread receive real-time log");
+    mThreadRealTimeLog->start();
+
+    // Insert log to table every second
+    QObject::connect(mTimerUpdateTable, &QTimer::timeout, mTimerUpdateTable, [this]()
                      {
-                         buffer->append(mProcessRealtimeLog->readAllStandardOutput());
-                         int idx = buffer->indexOf('\n');
-                         if (idx == -1)
-                         {
-                             return;
-                         }
-                         QByteArray raw = buffer->left(idx);
-                         buffer->remove(0, idx + 1);
+        if (ProcessHelper::mLastLogId < mLogHelper->mListObjs.size())
+        {
+            UiHandler::getInstance()->insertLogToTable(mLogHelper->mListObjs.mid(ProcessHelper::mLastLogId));
+            ProcessHelper::mLastLogId = mLogHelper->mListObjs.size();
+        } });
 
-                         QString line = QString::fromUtf8(raw).trimmed();
-                         Log log = LogHelper::convertToLog(line);
-                         LogHelper::getInstance()->mListLogs.append(log);
-                         LogHelper::getInstance()->updateHiddenLog(log);
-                         insertLogToTable(log); });
+    // Read real-time log output
+    QObject::connect(mProcessRealtimeLog, &QProcess::readyReadStandardOutput, mProcessRealtimeLog, [this]()
+                     { mBufferLogs->append(mProcessRealtimeLog->readAllStandardOutput()); });
+}
+
+// Read real-time log from mBufferLogs: used in thread mThreadRealTimeLog
+void ProcessHelper::receiveRealTimeLog()
+{
+    QList<Log> batch;
+    while (true)
+    {
+        if (mBufferLogs == nullptr)
+        {
+            continue;
+        }
+        
+        int idx = mBufferLogs->indexOf('\n');
+        while (idx != -1)
+        {
+            QByteArray raw = mBufferLogs->left(idx).trimmed();
+            mBufferLogs->remove(0, idx + 1);
+
+            if (!raw.isEmpty())
+            {
+                QString line = QString::fromUtf8(raw);
+                Log log = mLogHelper->convertToLog(line);
+
+                mLogHelper->updateHiddenLog(log);
+                batch.append(std::move(log));
+            }
+
+            idx = mBufferLogs->indexOf('\n');
+        }
+
+        if (!batch.isEmpty())
+        {
+            mLogHelper->mListObjs.append(batch);
+            batch.clear();
+        }
+    }
 }
 
 void ProcessHelper::stop()
@@ -152,6 +170,11 @@ void ProcessHelper::stop()
     {
         Logger::d(TAG, "Stop thread detect devices");
         mThreadDetectDevices->quit();
+    }
+    if (mThreadRealTimeLog != nullptr)
+    {
+        Logger::d(TAG, "Stop thread receive real-time log");
+        mThreadRealTimeLog->quit();
     }
     if (processReadLogCat != nullptr && processReadLogCat->state() == QProcess::Running)
     {
@@ -167,6 +190,7 @@ void ProcessHelper::stop()
     }
 }
 
+// Detect connected/disconnected devices: used in thread mThreadDetectDevices
 void ProcessHelper::detectDevices()
 {
     Logger::d(TAG, "Start detecting devices");
@@ -215,6 +239,7 @@ void ProcessHelper::detectDevices()
             }
         }
         Logger::d(TAG, "Update mCurrentDeviceIds");
+        mtxCurrentDeviceIds.lock();
         mCurrentDeviceIds = newDeviceIds;
     }
 }
@@ -237,10 +262,4 @@ void ProcessHelper::startWatchLogRealTime(const QString deviceId)
     Logger::d(TAG, "Starting real-time log for device ID: " + deviceId);
     QStringList command = {"-s", deviceId, "logcat"};
     mProcessRealtimeLog->start("adb", command);
-}
-
-void ProcessHelper::insertLogToTable(Log log)
-{
-    LogHelper::getInstance()->updateHiddenLog(log);
-    UiHandler::getInstance()->insertLogToTable(log);
 }

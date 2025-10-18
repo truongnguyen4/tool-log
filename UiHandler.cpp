@@ -17,13 +17,13 @@
 #include "SettingHelper.hpp"
 #include "PropertyHelper.hpp"
 
-const QString UiHandler::TAG = "UiHandler";
-
 // =================== Highlight implementation ====================
 // =================================================================
 void UiHandler::highlightFind(const QString key)
 {
     Logger::d(TAG, "highlightFindKey key = " + key);
+    DataHandler *dataHandler = DataHandler::getInstance();
+    mUtilHelper->addKey(dataHandler->mListFind, dataHandler->mFindId, key);
     QStringList keys = UtilHelper::splitKeywords(key);
     mTagHLDelegate->setKeyFind(keys);
     mMsgHLDelegate->setKeyFind(keys);
@@ -59,21 +59,18 @@ void UiHandler::highlightMsg(const QString &msg)
 void UiHandler::loadLogs()
 {
     Logger::d(TAG, "loadLogs");
+    mUi->table_logs->clearContents();
     mUi->table_logs->setUpdatesEnabled(false);
     mUi->table_logs->setRowCount(0);
 
-    QList<Log> logs = LogHelper::getInstance()->mListLogs;
-    for (int i = 0; i < logs.size(); ++i)
-    {
-        const Log &log = logs[i];
-        insertLogToTable(log);
-    }
+    QList<Log> logs = LogHelper::getInstance()->mListObjs;
+    insertLogToTable(logs);
     mUi->table_logs->setUpdatesEnabled(true);
 }
 
 void UiHandler::updateLogVisibility()
 {
-    QList<Log> &logs = LogHelper::getInstance()->mListLogs;
+    QList<Log> &logs = LogHelper::getInstance()->mListObjs;
     Logger::d(TAG, "updateLogVisibility");
     mUi->table_logs->setUpdatesEnabled(false);
     for (const Log &log : logs)
@@ -87,10 +84,21 @@ void UiHandler::updateLogVisibility()
     mUi->table_logs->setUpdatesEnabled(true);
 }
 
-void UiHandler::insertLogToTable(Log log)
+void UiHandler::insertLogToTable(const QList<Log> logs)
 {
-    const int row = mUi->table_logs->rowCount();
-    mUi->table_logs->insertRow(row);
+    mUi->table_logs->setUpdatesEnabled(false);
+    mUi->table_logs->setRowCount(mUi->table_logs->rowCount() + logs.size());
+    for (int i = 0; i < logs.size(); ++i)
+    {
+        insertLogToTable(logs[i], mUi->table_logs->rowCount() - logs.size() + i);
+    }
+    mUi->table_logs->setUpdatesEnabled(true);
+    mUi->table_logs->update();
+    mUi->table_logs->scrollToBottom();
+}
+
+void UiHandler::insertLogToTable(const Log &log, const int row)
+{
     mUi->table_logs->setItem(row, Constant::TableLog::COL_LINE, UtilHelper::createTableItem(QString::number(log.getLine()), Qt::AlignCenter));
     mUi->table_logs->setItem(row, Constant::TableLog::COL_DATE, UtilHelper::createTableItem(log.getDate(), Qt::AlignCenter));
     mUi->table_logs->setItem(row, Constant::TableLog::COL_TIME, UtilHelper::createTableItem(log.getTime(), Qt::AlignCenter));
@@ -100,7 +108,6 @@ void UiHandler::insertLogToTable(Log log)
     mUi->table_logs->setItem(row, Constant::TableLog::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft | Qt::AlignVCenter));
     mUi->table_logs->setItem(row, Constant::TableLog::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft | Qt::AlignVCenter));
     mUi->table_logs->setRowHidden(row, log.getHidden());
-    mUi->table_logs->scrollToBottom();
 }
 
 void UiHandler::updateLogShow(QTableWidgetItem *item)
@@ -108,36 +115,44 @@ void UiHandler::updateLogShow(QTableWidgetItem *item)
     mUi->log->setText(item->text());
 }
 
-void UiHandler::markLog(QTableWidgetItem *item)
+void UiHandler::toggleMarkLog(QTableWidgetItem *item)
 {
     const int row = item->row();
-    const bool isMarked = LogHelper::getInstance()->mListLogs[row].revertIsMarked();
-    const int rows = mUi->table_logmark->rowCount();
-    const Log log = LogHelper::getInstance()->mListLogs[row];
-
-    if (isMarked)
+    Log &log = LogHelper::getInstance()->mListObjs[row];
+    if (log.revertIsMarked())
     {
-        // mark log to table
-        mUi->table_logmark->insertRow(rows);
-        QTableWidgetItem *itemLine = new QTableWidgetItem();
-        itemLine->setData(Qt::DisplayRole, log.getLine());
-
-        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LINE, itemLine);
-        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TIME, UtilHelper::createTableItem(log.getTime(), Qt::AlignCenter));
-        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, UtilHelper::createTableItem(log.getPid(), Qt::AlignCenter));
-        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft | Qt::AlignVCenter));
-        mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft | Qt::AlignVCenter));
-
-        mUi->table_logmark->setSortingEnabled(true); // enable sorting to sort table logmark
-        mUi->table_logmark->sortItems(Constant::TableLogMark::COL_LINE, Qt::SortOrder::AscendingOrder);
-        mUi->table_logmark->setSortingEnabled(false); // disable sorting after completing sorting
-
-        // set foreground and background color of log in table logs
-        setHighLightMarkRow(mUi->table_logs, row, MARK_LOG_FOREGROUND_COLOR, MARK_LOG_BACKGROUND_COLOR);
-        Logger::d(TAG, "Mark line " + QString::number(log.getLine()));
-        return;
+        markLog(log, row);
     }
+    else
+    {
+        unmarkLog(log);
+    }
+}
 
+void UiHandler::markLog(const Log log, const int row)
+{
+    const int rows = mUi->table_logmark->rowCount();
+    mUi->table_logmark->insertRow(rows);
+    QTableWidgetItem *itemLine = new QTableWidgetItem();
+    itemLine->setData(Qt::DisplayRole, log.getLine());
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LINE, itemLine);
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TIME, UtilHelper::createTableItem(log.getTime(), Qt::AlignCenter));
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, UtilHelper::createTableItem(log.getPid(), Qt::AlignCenter));
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft | Qt::AlignVCenter));
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft | Qt::AlignVCenter));
+
+    mUi->table_logmark->setSortingEnabled(true); // enable sorting to sort table logmark
+    mUi->table_logmark->sortItems(Constant::TableLogMark::COL_LINE, Qt::SortOrder::AscendingOrder);
+    mUi->table_logmark->setSortingEnabled(false); // disable sorting after completing sorting
+
+    setHighLightMarkRow(mUi->table_logs, row, MARK_LOG_FOREGROUND_COLOR, MARK_LOG_BACKGROUND_COLOR);
+
+    Logger::d(TAG, "Mark line " + QString::number(log.getLine()));
+}
+
+void UiHandler::unmarkLog(const Log log)
+{
+    const int rows = mUi->table_logmark->rowCount();
     // unmark log from table log mark
     for (int row = 0; row < rows; row++)
     {
@@ -185,7 +200,7 @@ void UiHandler::focusLog(QTableWidgetItem *item)
 // ================================================================
 void UiHandler::loadSettings()
 {
-    QList<Setting> settings = SettingHelper::getInstance()->mListSettings;
+    QList<Setting> settings = SettingHelper::getInstance()->mListObjs;
     mUi->table_setting->setUpdatesEnabled(false);
     mUi->table_setting->setRowCount(settings.size());
     for (int i = 0; i < settings.size(); ++i)
@@ -197,7 +212,7 @@ void UiHandler::loadSettings()
 
 void UiHandler::updateValueSettings()
 {
-    const QList<Setting> settings = SettingHelper::getInstance()->mListSettings;
+    const QList<Setting> settings = SettingHelper::getInstance()->mListObjs;
     mUi->table_setting->setUpdatesEnabled(false);
     for (int i = 0; i < settings.size(); ++i)
     {
@@ -218,19 +233,19 @@ void UiHandler::updateValueSettings()
 
 void UiHandler::updateSettingsVisibility()
 {
-    const QList<Setting> settings = SettingHelper::getInstance()->mListSettings;
+    const QList<Setting> settings = SettingHelper::getInstance()->mListObjs;
     Logger::d(TAG, "updateSettingsVisibility");
     mUi->table_setting->setUpdatesEnabled(false);
     for (const Setting &setting : settings)
     {
-        Logger::d(TAG, "setting: " + QString::number(setting.getIsHidden()));
-        mUi->table_setting->setRowHidden(setting.getLine() - 1, setting.getIsHidden());
+        mUi->table_setting->setRowHidden(setting.getLine() - 1, setting.getHidden());
     }
     mUi->table_setting->setUpdatesEnabled(true);
 }
 
 void UiHandler::insertSettingToTable(const Setting setting, const int row)
 {
+    mUi->table_setting->setItem(row, Constant::TableSetting::COL_LINE, UtilHelper::createTableItem(QString::number(setting.getLine()), Qt::AlignCenter));
     mUi->table_setting->setItem(row, Constant::TableSetting::COL_GROUP, UtilHelper::createTableItem(setting.getGroup(), Qt::AlignCenter));
     mUi->table_setting->setItem(row, Constant::TableSetting::COL_SETTING, UtilHelper::createTableItem(setting.getName(), Qt::AlignLeft | Qt::AlignVCenter));
     mUi->table_setting->setCellWidget(row, Constant::TableSetting::COL_VALUE, new QLineEditDefault(setting.getValue()));
@@ -256,14 +271,14 @@ void UiHandler::insertSettingToTable(const Setting setting, const int row)
                 Logger::d(TAG, QString("Save setting: group: %1, setting: %2, value: %3").arg(group, name, value));
                 SettingHelper::getInstance()->setSetting(Setting(group, name, value), deviceId); });
     mUi->table_setting->setCellWidget(row, Constant::TableSetting::COL_SEND, save);
-    mUi->table_setting->setRowHidden(row, setting.getIsHidden());
+    mUi->table_setting->setRowHidden(row, setting.getHidden());
 }
 
 // ==================== Property implementation ====================
 // =================================================================
 void UiHandler::loadProperties()
 {
-    QList<Property> properties = PropertyHelper::getInstance()->mListProperties;
+    QList<Property> properties = PropertyHelper::getInstance()->mListObjs;
     mUi->table_property->setUpdatesEnabled(false);
     mUi->table_property->setRowCount(properties.size());
     for (int i = 0; i < properties.size(); ++i)
@@ -275,7 +290,7 @@ void UiHandler::loadProperties()
 
 void UiHandler::updateValueProperties()
 {
-    const QList<Property> properties = PropertyHelper::getInstance()->mListProperties;
+    const QList<Property> properties = PropertyHelper::getInstance()->mListObjs;
     mUi->table_property->setUpdatesEnabled(false);
     for (int i = 0; i < properties.size(); ++i)
     {
@@ -296,10 +311,12 @@ void UiHandler::updateValueProperties()
 
 void UiHandler::insertPropertyToTable(const Property property, const int row)
 {
+    mUi->table_property->setItem(row, Constant::TableProperty::COL_LINE, UtilHelper::createTableItem(QString::number(property.getLine()), Qt::AlignLeft | Qt::AlignVCenter));
     mUi->table_property->setItem(row, Constant::TableProperty::COL_PROPERTY, UtilHelper::createTableItem(property.getName(), Qt::AlignLeft | Qt::AlignVCenter));
     mUi->table_property->setCellWidget(row, Constant::TableProperty::COL_VALUE, new QLineEditDefault(property.getValue()));
     QPushButtonDefault *save = new QPushButtonDefault("");
-    QObject::connect(save, &QPushButtonDefault::pressed, [this, row]() {
+    QObject::connect(save, &QPushButtonDefault::pressed, [this, row]()
+                     {
                 const QString deviceId = mUi->device_ids->currentText();
                 if (deviceId.isEmpty())
                 {
@@ -318,17 +335,17 @@ void UiHandler::insertPropertyToTable(const Property property, const int row)
                 Logger::d(TAG, QString("Save property: property: %1, value: %2").arg(name, value));
                 PropertyHelper::getInstance()->setProperty(Property(name, value), deviceId); });
     mUi->table_property->setCellWidget(row, Constant::TableProperty::COL_SEND, save);
-    mUi->table_property->setRowHidden(row, property.getIsHidden());
+    mUi->table_property->setRowHidden(row, property.getHidden());
 }
 
 void UiHandler::updatePropertiesVisibility()
 {
     Logger::d(TAG, "updatePropertiesVisibility");
-    const QList<Property> properties = PropertyHelper::getInstance()->mListProperties;
+    const QList<Property> properties = PropertyHelper::getInstance()->mListObjs;
     mUi->table_property->setUpdatesEnabled(false);
     for (const Property &property : properties)
     {
-        mUi->table_property->setRowHidden(property.getLine() - 1, property.getIsHidden());
+        mUi->table_property->setRowHidden(property.getLine() - 1, property.getHidden());
     }
     mUi->table_property->setUpdatesEnabled(true);
 }
@@ -439,7 +456,9 @@ void UiHandler::initUi(Ui::MainWindow *ui)
 void UiHandler::clearLogcat()
 {
     mUi->table_logmark->clearContents();
+    mUi->table_logmark->setRowCount(0);
     mUi->table_logs->clearContents();
+    mUi->table_logs->setRowCount(0);
     mUi->log->clear();
 }
 
@@ -453,7 +472,7 @@ void UiHandler::clearMarkLogs()
         {
             int row = itemLine->data(Qt::DisplayRole).toInt() - 1;
             setHighLightMarkRow(mUi->table_logs, row);
-            LogHelper::getInstance()->mListLogs[row].revertIsMarked();
+            LogHelper::getInstance()->mListObjs[row].revertIsMarked();
         }
     }
     mUi->table_logmark->setRowCount(0);
@@ -500,8 +519,23 @@ void UiHandler::startWatching(const bool isWatching)
     if (isWatching)
     {
         mUi->table_logs->clearContents();
+        mUi->table_logs->setRowCount(0);
+        mUi->table_logmark->clearContents();
+        mUi->table_logmark->setRowCount(0);
     }
     mUi->start->setIcon(isWatching ? QIcon(":/icons/stop.png") : QIcon(":/icons/play.png"));
+}
+
+void UiHandler::startWatchingKernel(const bool isWatching)
+{
+    if (isWatching)
+    {
+        mUi->table_logs->clearContents();
+        mUi->table_logs->setRowCount(0);
+        mUi->table_logmark->clearContents();
+        mUi->table_logmark->setRowCount(0);
+    }
+    mUi->start_kernel->setIcon(isWatching ? QIcon(":/icons/stop.png") : QIcon(":/icons/start_kernel.png"));
     mUi->clear->setDisabled(isWatching);
 }
 
