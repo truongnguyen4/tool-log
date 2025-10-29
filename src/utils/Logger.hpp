@@ -1,7 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "QString"
+#include <QString>
 #include <iostream>
 #include <QMap>
 #include <QPair>
@@ -61,7 +61,7 @@ public:
     }
 private:
     inline static QMap<QString, QPair<qint64, qint64>> mTimeStampMap = QMap<QString, QPair<qint64, qint64>>();
-    inline static bool VERBOSE = false;
+    inline static bool VERBOSE = true;
 
 };
 #endif // LOGGER_H

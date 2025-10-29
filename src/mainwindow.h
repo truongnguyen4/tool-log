@@ -1,13 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QMainWindow>
+#include <QAtomicInteger>
 #include "UiHandler.hpp"
 #include "DataHandler.hpp"
-#include <QMainWindow>
-#include "NotificationDialog.hpp"
 #include "SettingDialog.hpp"
-#include <QAtomicInteger>
 #include "ProcessHelper.hpp"
+#include "ui_mainwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui

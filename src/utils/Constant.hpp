@@ -1,6 +1,7 @@
 #ifndef CONSTANT_HPP
 #define CONSTANT_HPP
 #include <QString>
+#include <QList>
 class Constant final
 {
 public:

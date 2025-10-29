@@ -1,7 +1,7 @@
 #ifndef NOTIFICATIONHELPER_H
 #define NOTIFICATIONHELPER_H
 #include <QString>
-#include "mainwindow.h"
+#include "NotificationDialog.hpp"
 
 class NotificationHelper
 {

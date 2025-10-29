@@ -2,8 +2,7 @@
 #include <QFile>
 #include "Logger.hpp"
 #include "NotificationHelper.hpp"
-#include "QString"
-#include "mainwindow.h"
+#include <QString>
 #include "LogHelper.hpp"
 #include <QString>
 #include <QFileInfo>
@@ -66,7 +65,7 @@ bool FileHelper::checkPath(const QString filePath)
         }
 
         // Guard against unexpectedly large files being loaded into memory
-        constexpr qint64 MAX_READ_SIZE = 50LL * 1024 * 1024; // 50 MB
+        constexpr qint64 MAX_READ_SIZE = 500LL * 1024 * 1024; // 500 MB
         if (info.size() > MAX_READ_SIZE)
         {
             Logger::e(TAG, QString("File too large to read safely (%1 bytes): %2").arg(info.size()).arg(path));

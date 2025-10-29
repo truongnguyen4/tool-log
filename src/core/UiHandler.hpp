@@ -1,7 +1,7 @@
 #ifndef UIHANDLER_HPP
 #define UIHANDLER_HPP
 #include "Log.hpp"
-#include "./ui_mainwindow.h"
+#include "ui_mainwindow.h"
 #include "HighlightKey.hpp"
 #include "HighlightCell.hpp"
 #include "Setting.hpp"

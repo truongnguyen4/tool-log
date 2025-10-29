@@ -1,7 +1,6 @@
 #include "DataHandler.hpp"
 #include "mainwindow.h"
 #include "Logger.hpp"
-#include "UtilHelper.hpp"
 
 void DataHandler::filterLogs(const QString &pid, const QString &tag, const QString &msg, const QString &level)
 {

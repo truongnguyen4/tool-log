@@ -1,11 +1,9 @@
 #ifndef DATAHANDLER_H
 #define DATAHANDLER_H
-#include "FileHelper.hpp"
 #include "ui_mainwindow.h"
 #include <QString>
+#include "FileHelper.hpp"
 #include "ProcessHelper.hpp"
-#include "Property.hpp"
-#include "Setting.hpp"
 #include "LogHelper.hpp"
 #include "PropertyHelper.hpp"
 #include "SettingHelper.hpp"

@@ -3,6 +3,8 @@
 #include "Logger.hpp"
 #include <QThread>
 #include "NotificationHelper.hpp"
+#include "FileHelper.hpp"
+#include "UiHandler.hpp"
 
 void ProcessHelper::registerDeviceChangeListener(DeviceChangeListener *listener)
 {
@@ -104,9 +106,8 @@ ProcessHelper::ProcessHelper()
 {
     mTimerUpdateTable->setInterval(1000); // 1 second
     mTimerUpdateTable->setSingleShot(false);
-    mTimerUpdateTable->start();
+   
 
-    // mThreadDetectDevices = QThread::create([=]() { detectDevices(); });
     Logger::d(TAG, "Start thread detect devices");
     mThreadDetectDevices->start();
 
@@ -256,10 +257,12 @@ void ProcessHelper::startWatchLogRealTime(const QString deviceId)
         Logger::w(TAG, "Stopping previous real-time log process");
         mProcessRealtimeLog->kill();
         mProcessRealtimeLog->waitForFinished();
+        mTimerUpdateTable->stop();
         return;
     }
 
     Logger::d(TAG, "Starting real-time log for device ID: " + deviceId);
     QStringList command = {"-s", deviceId, "logcat"};
     mProcessRealtimeLog->start("adb", command);
+    mTimerUpdateTable->start();
 }

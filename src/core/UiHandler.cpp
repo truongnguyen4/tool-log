@@ -60,12 +60,9 @@ void UiHandler::loadLogs()
 {
     Logger::d(TAG, "loadLogs");
     mUi->table_logs->clearContents();
-    mUi->table_logs->setUpdatesEnabled(false);
     mUi->table_logs->setRowCount(0);
-
     QList<Log> logs = LogHelper::getInstance()->mListObjs;
     insertLogToTable(logs);
-    mUi->table_logs->setUpdatesEnabled(true);
 }
 
 void UiHandler::updateLogVisibility()
@@ -86,6 +83,7 @@ void UiHandler::updateLogVisibility()
 
 void UiHandler::insertLogToTable(const QList<Log> logs)
 {
+    Logger::d(TAG, "insertLogToTable(logs)");
     mUi->table_logs->setUpdatesEnabled(false);
     mUi->table_logs->setRowCount(mUi->table_logs->rowCount() + logs.size());
     for (int i = 0; i < logs.size(); ++i)

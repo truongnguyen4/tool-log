@@ -8,71 +8,93 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-# set(Qt6_DIR "/path/to/Qt/6.9.1/gcc_64/lib/cmake/Qt6")
+# set(Qt6_DIR "/home/truongnguyen/Qt/6.9.1/gcc_64/lib/cmake/Qt6")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-
-set(CONTROLLER
-    UiHandler.hpp
-    UiHandler.cpp
-    DataHandler.hpp
-    DataHandler.cpp
+set(CMAKE_AUTOUIC_SEARCH_PATHS 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/forms
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-set(MODEL
-    FileHelper.hpp
-    FileHelper.cpp
-    ProcessHelper.hpp
-    ProcessHelper.cpp
-    NotificationHelper.hpp
-    LogHelper.hpp
-    LogHelper.cpp
-    HighlightKey.hpp
-    HighlightCell.hpp
-    HighlightDelegate.hpp
-    PropertyHelper.hpp
-    PropertyHelper.cpp
-    SettingHelper.hpp
-    SettingHelper.cpp
+set(FORMS
+    src/forms/Settings.ui
+    src/forms/mainwindow.ui
+)
+    
+set(UI
+
+    src/ui/NotificationDialog.hpp
+    src/ui/NotificationDialog.cpp
+    src/ui/QPushButtonDefault.h
+    src/ui/QLineEditDefault.h
+    src/ui/SettingDialog.hpp
+    src/ui/SettingDialog.cpp
+    src/ui/HighlightCell.hpp
+    src/ui/HighlightDelegate.hpp
+    src/ui/HighlightKey.hpp
+)
+
+set(CORE
+    src/core/UiHandler.hpp
+    src/core/UiHandler.cpp
+    src/core/DataHandler.hpp
+    src/core/DataHandler.cpp
 )
 
 set(UTIL
-    Log.hpp
-    Logger.hpp
-    NotificationDialog.hpp
-    NotificationDialog.cpp
-    SettingDialog.hpp
-    SettingDialog.cpp
-    Setting.hpp
-    Property.hpp
-    QPushButtonDefault.h
-    QLineEditDefault.h
-    UtilHelper.hpp
+    src/utils/Logger.hpp
+    src/utils/UtilHelper.hpp
+    src/utils/Constant.hpp
+    src/utils/Property.hpp
+    src/utils/Setting.hpp
+    src/utils/Log.hpp
+)
+
+set(CONTROL
+    src/control/LogHelper.cpp
+    src/control/LogHelper.hpp
+    src/control/FileHelper.hpp
+    src/control/FileHelper.cpp
+    src/control/ProcessHelper.hpp
+    src/control/PropertyHelper.hpp
+    src/control/SettingHelper.hpp
+    src/control/SettingHelper.cpp
+    src/control/ProcessHelper.cpp
+    src/control/PropertyHelper.cpp
 )
 
 set(PROJECT_SOURCES
     main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    Settings.ui
+    ${CONTROL}
+    ${CORE}
+    ${FORMS}
+    ${UI}
     ${UTIL}
-    ${MODEL}
-    ${CONTROLLER}
 )
 
 qt_add_executable(tool-log
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    src/mainwindow.h
+    src/mainwindow.cpp
     resource.qrc
 )
 
 target_link_libraries(tool-log PRIVATE Qt6::Widgets)
 
+# Add include directories for each component
+target_include_directories(tool-log PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/control
+    ${CMAKE_SOURCE_DIR}/src/core
+    ${CMAKE_SOURCE_DIR}/src/forms
+    ${CMAKE_SOURCE_DIR}/src/ui
+    ${CMAKE_SOURCE_DIR}/src/utils
+    ${CMAKE_SOURCE_DIR}/src/
+)
+
 # Optional: Bundle settings for macOS/iOS
 set_target_properties(tool-log PROPERTIES
-    MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 

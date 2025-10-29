@@ -1,11 +1,10 @@
-#include "mainwindow.h"
-#include "./ui_mainwindow.h"
 #include <QDebug>
-#include "Log.hpp"
 #include <QTableWidgetItem>
 #include <QDateTime>
-#include "Logger.hpp"
 #include <QDateTime>
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "Logger.hpp"
 
 QString const MainWindow::TAG = "MainWindow";
 
