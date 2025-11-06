@@ -134,8 +134,11 @@ void UiHandler::markLog(const Log log, const int row)
     QTableWidgetItem *itemLine = new QTableWidgetItem();
     itemLine->setData(Qt::DisplayRole, log.getLine());
     mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LINE, itemLine);
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_DATE, UtilHelper::createTableItem(log.getDate(), Qt::AlignCenter));
     mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TIME, UtilHelper::createTableItem(log.getTime(), Qt::AlignCenter));
     mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, UtilHelper::createTableItem(log.getPid(), Qt::AlignCenter));
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TID, UtilHelper::createTableItem(log.getTid(), Qt::AlignCenter));
+    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LEVEL, UtilHelper::createTableItem(log.getLevel(), Qt::AlignCenter));
     mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft | Qt::AlignVCenter));
     mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft | Qt::AlignVCenter));
 
@@ -388,6 +391,9 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->table_logmark->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     mUi->table_logmark->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     mUi->table_logmark->setAutoScroll(false);
+    mUi->table_logmark->setColumnHidden(Constant::TableLogMark::COL_DATE, true);
+    mUi->table_logmark->setColumnHidden(Constant::TableLogMark::COL_TIME, true);
+    mUi->table_logmark->setColumnHidden(Constant::TableLogMark::COL_TID, true);
     mUi->table_logmark->setStyleSheet(R"(
         QTableWidget::item:selected {
             background-color: #3399ff;

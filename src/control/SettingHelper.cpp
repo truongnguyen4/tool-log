@@ -2,7 +2,6 @@
 #include "ProcessHelper.hpp"
 #include "Constant.hpp"
 #include "Logger.hpp"
-#include "NotificationHelper.hpp"
 #include "UtilHelper.hpp"
 
 void SettingHelper::setSettings(const QList<Setting> settings, const QString deviceId)

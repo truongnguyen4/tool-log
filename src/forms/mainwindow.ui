@@ -38,7 +38,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="resource.qrc">:/icons/device.png</pixmap>
+           <pixmap resource="../../resource.qrc">:/icons/device.png</pixmap>
           </property>
          </widget>
         </item>
@@ -101,7 +101,7 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resource.qrc">
+                   <iconset resource="../../resource.qrc">
                     <normaloff>:/icons/play.png</normaloff>:/icons/play.png</iconset>
                   </property>
                  </widget>
@@ -115,7 +115,7 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resource.qrc">
+                   <iconset resource="../../resource.qrc">
                     <normaloff>:/icons/start_kernel.png</normaloff>:/icons/start_kernel.png</iconset>
                   </property>
                  </widget>
@@ -129,7 +129,7 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resource.qrc">
+                   <iconset resource="../../resource.qrc">
                     <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
                   </property>
                  </widget>
@@ -143,7 +143,7 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resource.qrc">
+                   <iconset resource="../../resource.qrc">
                     <normaloff>:/icons/remove-bookmark.png</normaloff>:/icons/remove-bookmark.png</iconset>
                   </property>
                  </widget>
@@ -173,7 +173,7 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="resource.qrc">
+                   <iconset resource="../../resource.qrc">
                     <normaloff>:/icons/setting.png</normaloff>:/icons/setting.png</iconset>
                   </property>
                  </widget>
@@ -193,7 +193,7 @@
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resource.qrc">
+                     <iconset resource="../../resource.qrc">
                       <normaloff>:/icons/folder.png</normaloff>:/icons/folder.png</iconset>
                     </property>
                    </widget>
@@ -224,7 +224,7 @@
                      <string/>
                     </property>
                     <property name="pixmap">
-                     <pixmap resource="resource.qrc">:/icons/find.png</pixmap>
+                     <pixmap resource="../../resource.qrc">:/icons/find.png</pixmap>
                     </property>
                    </widget>
                   </item>
@@ -526,12 +526,27 @@
              </column>
              <column>
               <property name="text">
+               <string>Date</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
                <string>Time</string>
               </property>
              </column>
              <column>
               <property name="text">
                <string>PID</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>TID</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Level</string>
               </property>
              </column>
              <column>
@@ -562,7 +577,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="resource.qrc">
+               <iconset resource="../../resource.qrc">
                 <normaloff>:/icons/refresh.png</normaloff>:/icons/refresh.png</iconset>
               </property>
              </widget>
@@ -592,7 +607,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resource.qrc">:/icons/find.png</pixmap>
+                 <pixmap resource="../../resource.qrc">:/icons/find.png</pixmap>
                 </property>
                </widget>
               </item>
@@ -642,7 +657,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resource.qrc">:/icons/find.png</pixmap>
+                 <pixmap resource="../../resource.qrc">:/icons/find.png</pixmap>
                 </property>
                </widget>
               </item>
@@ -688,7 +703,7 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
-  <include location="resource.qrc"/>
+  <include location="../../resource.qrc"/>
  </resources>
  <connections/>
 </ui>
