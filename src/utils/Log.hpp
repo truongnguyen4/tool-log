@@ -117,15 +117,14 @@ public:
 
     QStringList getListData() const
     {
-        return QStringList{
-            QString::number(line),
-            date,
-            time,
-            pid,
-            tid,
-            level,
-            tag,
-            msg};
+        return QStringList{QString::number(line)
+                           , date
+                           , time
+                           , pid
+                           , tid
+                           , level
+                           , tag
+                           , msg};
     }
 };
 

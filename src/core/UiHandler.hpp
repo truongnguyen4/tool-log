@@ -21,7 +21,7 @@ private:
     static inline UiHandler *instance = nullptr;
     int LINE_HEIGTH = 30;
     QColor MARK_LOG_FOREGROUND_COLOR = QColorConstants::Black;
-    QColor MARK_LOG_BACKGROUND_COLOR = QColorConstants::LightGray;
+    QColor MARK_LOG_BACKGROUND_COLOR = QColor("#642C48");
     HighlightKey *mTagHLDelegate = nullptr;
     HighlightKey *mMsgHLDelegate = nullptr;
     HighlightCell *mLevelHLDelegate = nullptr;

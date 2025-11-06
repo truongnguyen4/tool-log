@@ -8,15 +8,15 @@ class HighlightKey : public HighlightDelegate
 {
 private:
     QList<QPair<QColor, QColor>> mKeyFilterColors = {
-        {QColor(56, 142, 60), QColor(200, 230, 201)},  // Green on light green
         {QColor(251, 192, 45), QColor(255, 249, 196)}, // Yellow on light yellow
         {QColor(211, 47, 47), QColor(255, 205, 210)},  // Red on light red
         {QColor(123, 31, 162), QColor(225, 190, 231)}, // Purple on light purple
         {QColor(245, 124, 0), QColor(255, 224, 178)},  // Orange on light orange
-        {QColor(2, 136, 209), QColor(179, 229, 252)},  // Cyan on light cyan
+        {QColor(56, 142, 60), QColor(200, 230, 201)},  // Green on light green
         {QColor(194, 24, 91), QColor(248, 187, 208)},  // Pink on light pink
         {QColor(69, 90, 100), QColor(207, 216, 220)},  // Blue Grey on light blue grey
         {QColor(0, 150, 136), QColor(178, 223, 219)},  // Teal on light teal
+        {QColor(2, 136, 209), QColor(179, 229, 252)},  // Cyan on light cyan
         {QColor(141, 110, 99), QColor(215, 204, 200)},  // Brown on light brown
         {QColor(25, 118, 210), QColor(227, 242, 253)} // Blue on light blue
     };

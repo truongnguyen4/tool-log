@@ -97,14 +97,31 @@ void UiHandler::insertLogToTable(const QList<Log> logs)
 
 void UiHandler::insertLogToTable(const Log &log, const int row)
 {
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_LINE, UtilHelper::createTableItem(QString::number(log.getLine()), Qt::AlignCenter));
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_DATE, UtilHelper::createTableItem(log.getDate(), Qt::AlignCenter));
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_TIME, UtilHelper::createTableItem(log.getTime(), Qt::AlignCenter));
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_PID, UtilHelper::createTableItem(log.getPid(), Qt::AlignCenter));
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_TID, UtilHelper::createTableItem(log.getTid(), Qt::AlignCenter));
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_LEVEL, UtilHelper::createTableItem(log.getLevel(), Qt::AlignCenter));
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft | Qt::AlignVCenter));
-    mUi->table_logs->setItem(row, Constant::TableLog::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft | Qt::AlignVCenter));
+    const int columns = Constant::TableLog::getTableColumns().size();
+    QStringList logData = log.getListData();
+
+    QList<int> aligns = {Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignLeft | Qt::AlignVCenter
+                         , Qt::AlignLeft | Qt::AlignVCenter};
+
+    // Insert item to table
+    for (int column=0; column < columns; column++)
+    {
+        mUi->table_logs->setItem(row, column, UtilHelper::createTableItem(logData[column], aligns[column]));
+    }
+
+    // Set foreground color for item depends on level
+    for (int column : Constant::TableLog::getTableColumns())
+    {
+        mUi->table_logs->item(row, column)->setForeground(QBrush(Constant::LogLevel::getColorLevel(log.getLevel())));
+    }
+
+    // Update show/hide row in table
     mUi->table_logs->setRowHidden(row, log.getHidden());
 }
 
@@ -133,14 +150,30 @@ void UiHandler::markLog(const Log log, const int row)
     mUi->table_logmark->insertRow(rows);
     QTableWidgetItem *itemLine = new QTableWidgetItem();
     itemLine->setData(Qt::DisplayRole, log.getLine());
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LINE, itemLine);
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_DATE, UtilHelper::createTableItem(log.getDate(), Qt::AlignCenter));
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TIME, UtilHelper::createTableItem(log.getTime(), Qt::AlignCenter));
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_PID, UtilHelper::createTableItem(log.getPid(), Qt::AlignCenter));
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TID, UtilHelper::createTableItem(log.getTid(), Qt::AlignCenter));
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_LEVEL, UtilHelper::createTableItem(log.getLevel(), Qt::AlignCenter));
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_TAG, UtilHelper::createTableItem(log.getTag(), Qt::AlignLeft | Qt::AlignVCenter));
-    mUi->table_logmark->setItem(rows, Constant::TableLogMark::COL_MSG, UtilHelper::createTableItem(log.getMsg(), Qt::AlignLeft | Qt::AlignVCenter));
+
+    const int columns = Constant::TableLogMark::getTableColumns().size();
+    QStringList logData = log.getListData();
+
+    QList<int> aligns = {Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignVCenter
+                         , Qt::AlignLeft | Qt::AlignVCenter
+                         , Qt::AlignLeft | Qt::AlignVCenter};
+
+    // Insert item to table
+    for (int column=0; column < columns; column++)
+    {
+        mUi->table_logmark->setItem(rows, column, UtilHelper::createTableItem(logData[column], aligns[column]));
+    }
+
+    // Set foreground color for item depends on level
+    for (int column : Constant::TableLogMark::getTableColumns())
+    {
+        mUi->table_logmark->item(rows, column)->setForeground(QBrush(Constant::LogLevel::getColorLevel(log.getLevel())));
+    }
 
     mUi->table_logmark->setSortingEnabled(true); // enable sorting to sort table logmark
     mUi->table_logmark->sortItems(Constant::TableLogMark::COL_LINE, Qt::SortOrder::AscendingOrder);
@@ -375,8 +408,8 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->table_logs->setColumnHidden(Constant::TableLog::COL_TID, true);
     mUi->table_logs->setStyleSheet(R"(
         QTableWidget::item:selected {
-            background-color: #3399ff;
-            color: white;
+            background-color: #642C48;
+            color: #FFFFFF;
         }
     )");
 
@@ -396,8 +429,8 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->table_logmark->setColumnHidden(Constant::TableLogMark::COL_TID, true);
     mUi->table_logmark->setStyleSheet(R"(
         QTableWidget::item:selected {
-            background-color: #3399ff;
-            color: white;
+            background-color: #642C48;
+            color: #FFFFFF;
         }
     )");
 
@@ -415,8 +448,8 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->table_property->horizontalHeader()->setSectionResizeMode(Constant::TableProperty::COL_VALUE, QHeaderView::Stretch);
     mUi->table_property->setStyleSheet(R"(
             QTableWidget::item:selected {
-                background-color: #3399ff;
-                color: white;
+                background-color: #642C48;
+                color: #FFFFFF;
             }
         )");
 
@@ -435,10 +468,22 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->table_setting->horizontalHeader()->setSectionResizeMode(Constant::TableSetting::COL_VALUE, QHeaderView::Stretch);
     mUi->table_setting->setStyleSheet(R"(
         QTableWidget::item:selected {
-            background-color: #3399ff;
-            color: white;
+            background-color: #642C48;
+            color: #FFFFFF;
         }
     )");
+
+    const int spl_filter_log_width = mUi->spl_filter_log->width();
+    Logger::d(TAG, "spl_filter_log_width = " + QString::number(spl_filter_log_width));
+    mUi->spl_filter_log->setSizes({spl_filter_log_width / 6, spl_filter_log_width * 5 / 6});
+
+    const int spl_filter_property_width = mUi->spl_filter_property->width();
+    Logger::d(TAG, "spl_filter_property_width = " + QString::number(spl_filter_property_width));
+    mUi->spl_filter_property->setSizes({spl_filter_property_width / 6, spl_filter_property_width * 5 / 6});
+
+    const int spl_setting_width = mUi->spl_setting->width();
+    mUi->spl_setting->setSizes({spl_setting_width / 2, spl_setting_width / 2});
+
 
     // Line Text
     mUi->file->setFixedHeight(LINE_HEIGTH);
@@ -555,7 +600,7 @@ void UiHandler::setHighLightMarkRow(QTableWidget *table, int row, QBrush foregro
     {
         if (QTableWidgetItem *item = table->item(row, col))
         {
-            item->setForeground(foregroundColor);
+            // item->setForeground(foregroundColor);
             item->setBackground(backgroundColor);
         }
     }
@@ -587,6 +632,6 @@ void UiHandler::initHLDelegate()
                                        Constant::LogLevel::I,
                                        Constant::LogLevel::W,
                                        Constant::LogLevel::E});
-        mUi->table_logs->setItemDelegateForColumn(Constant::TableLog::COL_LEVEL, mLevelHLDelegate);
+        // mUi->table_logs->setItemDelegateForColumn(Constant::TableLog::COL_LEVEL, mLevelHLDelegate);
     }
 }

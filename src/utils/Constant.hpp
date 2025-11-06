@@ -2,6 +2,8 @@
 #define CONSTANT_HPP
 #include <QString>
 #include <QList>
+#include <QColor>
+
 class Constant final
 {
 public:
@@ -62,6 +64,27 @@ public:
         inline static const QString I = "I";
         inline static const QString W = "W";
         inline static const QString E = "E";
+
+        inline static const QColor COLOR_V = QColor(200, 200, 200);
+        inline static const QColor COLOR_D = QColor(18, 105, 170);
+        inline static const QColor COLOR_I = QColor(134, 172, 49);
+        inline static const QColor COLOR_W = QColor(180, 118, 21);
+        inline static const QColor COLOR_E = QColor(255, 69, 0);
+
+        static QColor getColorLevel(const QString level) {
+            if (level == V) {
+                return COLOR_V;
+            } else if (level == D) {
+                return COLOR_D;
+            } else if (level == I) {
+                return COLOR_I;
+            } else if (level == W) {
+                return COLOR_W;
+            } else if (level == E) {
+                return COLOR_E;
+            }
+            return COLOR_V;
+        }
     };
 
     class TableLog final
@@ -84,7 +107,7 @@ public:
         inline static const QString LEVEL = "Level";
         inline static const QString TAG = "Tag";
         inline static const QString MSG = "Message";
-        QList<int> getTableColumns() const
+        static QList<int> getTableColumns()
         {
             return QList<int>{COL_LINE, COL_DATE, COL_TIME, COL_PID, COL_TID, COL_LEVEL, COL_TAG, COL_MSG};
         }
@@ -110,7 +133,7 @@ public:
         inline static const QString LEVEL = "Level";
         inline static const QString TAG = "Tag";
         inline static const QString MSG = "Message";
-        QList<int> getTableColumns() const
+        static QList<int> getTableColumns()
         {
             return QList<int>{COL_LINE, COL_DATE, COL_TIME, COL_PID, COL_TID, COL_LEVEL, COL_TAG, COL_MSG};
         }
