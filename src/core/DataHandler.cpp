@@ -2,18 +2,23 @@
 #include "mainwindow.h"
 #include "Logger.hpp"
 
-void DataHandler::filterLogs(const QString &pid, const QString &tag, const QString &msg, const QString &level)
+void DataHandler::filterLogs(const QString &pid, const QString &tag, const QString &msg, const QString &level
+                                , const QString &line, const QString &time)
 {
-    Logger::d(TAG, "filterLogs called with pid: " + pid + ", tag: " + tag + ", msg: " + msg + ", level: " + level);
+    Logger::d(TAG, "filterLogs called with pid: " + pid + ", tag: " + tag + ", msg: " + msg + ", level: " + level + ", line = " + line + ", time = " + time);
     mUtilHelper->addKey(mListPid, mPidId, pid);
     mUtilHelper->addKey(mListTag, mTagId, tag);
     mUtilHelper->addKey(mListMsg, mMsgId, msg);
     mUtilHelper->addKey(mListLevel, mLevelId, level);
+    mUtilHelper->addKey(mListLine, mLineId, line);
+    mUtilHelper->addKey(mListTime, mTimeId, time);
 
-    mUtilHelper->updateFilter(mLogHelper->mListPids, mLogHelper->pidAndOp, pid);
+    mUtilHelper->updateFilter(mLogHelper->mListKeyPids, mLogHelper->pidAndOp, pid);
     mUtilHelper->updateFilter(mLogHelper->mListKeyTags, mLogHelper->tagAndOp, tag);
-    mUtilHelper->updateFilter(mLogHelper->mListMsgs, mLogHelper->msgAndOp, msg);
+    mUtilHelper->updateFilter(mLogHelper->mListKeyMsgs, mLogHelper->msgAndOp, msg);
     mUtilHelper->updateFilter(mLogHelper->mListKeyLevels, mLogHelper->levelAndOp, level);
+    mUtilHelper->updateFilter(mLogHelper->mListKeyLines, line);
+    mUtilHelper->updateFilter(mLogHelper->mListKeyTimes, time);
 
     mLogHelper->filterLogs();
 }
@@ -107,11 +112,19 @@ QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
     {
         return findPrevious(mListLevel, mLevelId);
     }
-    if (obj == ui->property_filter)
+    if (obj == ui->line)
+    {
+        return findPrevious(mListLine, mLineId);
+    }
+    if (obj == ui->time)
+    {
+        return findPrevious(mListTime, mTimeId);
+    }
+    if (obj == ui->property)
     {
         return findPrevious(mListProperty, mPropertyId);
     }
-    if (obj == ui->setting_filter)
+    if (obj == ui->setting)
     {
         return findPrevious(mListSetting, mSettingId);
     }
@@ -151,11 +164,19 @@ QString DataHandler::nextKey(Ui::MainWindow *ui, QObject *obj)
     {
         return findNext(mListLevel, mLevelId);
     }
-    if (obj == ui->property_filter)
+    if (obj == ui->line)
+    {
+        return findNext(mListLine, mLineId);
+    }
+    if (obj == ui->time)
+    {
+        return findNext(mListTime, mTimeId);
+    }
+    if (obj == ui->property)
     {
         return findNext(mListProperty, mPropertyId);
     }
-    if (obj == ui->setting_filter)
+    if (obj == ui->setting)
     {
         return findNext(mListSetting, mSettingId);
     }

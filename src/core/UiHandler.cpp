@@ -112,6 +112,13 @@ void UiHandler::insertLogToTable(const Log &log, const int row)
     // Insert item to table
     for (int column=0; column < columns; column++)
     {
+        if (column == Constant::TableLog::COL_LINE)
+        {
+            QTableWidgetItem *itemLine = new QTableWidgetItem();
+            itemLine->setData(Qt::DisplayRole, log.getLine());
+            mUi->table_logs->setItem(row, column, itemLine);
+            continue;
+        }
         mUi->table_logs->setItem(row, column, UtilHelper::createTableItem(logData[column], aligns[column]));
     }
 
@@ -127,7 +134,14 @@ void UiHandler::insertLogToTable(const Log &log, const int row)
 
 void UiHandler::updateLogShow(QTableWidgetItem *item)
 {
-    mUi->log->setText(item->text());
+    if (item->tableWidget() == mUi->table_logs)
+    {
+        mUi->log->setText(item->text());
+    }
+    if (item->tableWidget() == mUi->table_setting || item->tableWidget() == mUi->table_property)
+    {
+        mUi->setting_property->setText(item->text());
+    }
 }
 
 void UiHandler::toggleMarkLog(QTableWidgetItem *item)
@@ -166,6 +180,13 @@ void UiHandler::markLog(const Log log, const int row)
     // Insert item to table
     for (int column=0; column < columns; column++)
     {
+        if (column == Constant::TableLogMark::COL_LINE)
+        {
+            QTableWidgetItem *itemLine = new QTableWidgetItem();
+            itemLine->setData(Qt::DisplayRole, log.getLine());
+            mUi->table_logmark->setItem(rows, column, itemLine);
+            continue;
+        }
         mUi->table_logmark->setItem(rows, column, UtilHelper::createTableItem(logData[column], aligns[column]));
     }
 
@@ -394,7 +415,12 @@ void UiHandler::initUi(Ui::MainWindow *ui)
 
     // Table logs
     mUi->table_logs->verticalHeader()->setVisible(false);
-    mUi->table_logs->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    mUi->table_logs->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    mUi->table_logs->horizontalHeader()->setStretchLastSection(true);
+    mUi->table_logs->setColumnWidth(Constant::TableLog::COL_LINE, 60);
+    mUi->table_logs->setColumnWidth(Constant::TableLog::COL_LEVEL, 60);
+    mUi->table_logs->setColumnWidth(Constant::TableLog::COL_PID, 80);
+    mUi->table_logs->setColumnWidth(Constant::TableLog::COL_TAG, 200);
     mUi->table_logs->setWordWrap(false);
     mUi->table_logs->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mUi->table_logs->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -415,7 +441,12 @@ void UiHandler::initUi(Ui::MainWindow *ui)
 
     // Table logs mark
     mUi->table_logmark->verticalHeader()->setVisible(false);
-    mUi->table_logmark->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    mUi->table_logmark->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    mUi->table_logmark->horizontalHeader()->setStretchLastSection(true);
+    mUi->table_logmark->setColumnWidth(Constant::TableLogMark::COL_LINE, 60);
+    mUi->table_logmark->setColumnWidth(Constant::TableLogMark::COL_LEVEL, 60);
+    mUi->table_logmark->setColumnWidth(Constant::TableLogMark::COL_PID, 80);
+    mUi->table_logmark->setColumnWidth(Constant::TableLogMark::COL_TAG, 200);
     mUi->table_logmark->setWordWrap(false);
     mUi->table_logmark->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mUi->table_logmark->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -436,6 +467,11 @@ void UiHandler::initUi(Ui::MainWindow *ui)
 
     // Table properties
     mUi->table_property->verticalHeader()->setVisible(false);
+    mUi->table_property->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    mUi->table_property->horizontalHeader()->setSectionResizeMode(Constant::TableProperty::COL_VALUE, QHeaderView::Stretch);
+    mUi->table_property->setColumnWidth(Constant::TableProperty::COL_LINE, 60);
+    mUi->table_property->setColumnWidth(Constant::TableProperty::COL_PROPERTY, 300);
+    mUi->table_property->setColumnWidth(Constant::TableProperty::COL_SEND, 80);
     mUi->table_property->setWordWrap(false);
     mUi->table_property->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mUi->table_property->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -444,8 +480,6 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->table_property->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     mUi->table_property->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     mUi->table_property->setAutoScroll(false);
-    mUi->table_property->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    mUi->table_property->horizontalHeader()->setSectionResizeMode(Constant::TableProperty::COL_VALUE, QHeaderView::Stretch);
     mUi->table_property->setStyleSheet(R"(
             QTableWidget::item:selected {
                 background-color: #642C48;
@@ -455,6 +489,12 @@ void UiHandler::initUi(Ui::MainWindow *ui)
 
     // Table settings
     mUi->table_setting->verticalHeader()->setVisible(false);
+    mUi->table_setting->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    mUi->table_setting->horizontalHeader()->setSectionResizeMode(Constant::TableSetting::COL_VALUE, QHeaderView::Stretch);
+    mUi->table_setting->setColumnWidth(Constant::TableSetting::COL_LINE, 60);
+    mUi->table_setting->setColumnWidth(Constant::TableSetting::COL_GROUP, 100);
+    mUi->table_setting->setColumnWidth(Constant::TableSetting::COL_SETTING, 300);
+    mUi->table_setting->setColumnWidth(Constant::TableSetting::COL_SEND, 80);
     mUi->table_setting->setWordWrap(false);
     mUi->table_setting->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mUi->table_setting->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -463,9 +503,6 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->table_setting->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     mUi->table_setting->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     mUi->table_setting->setAutoScroll(false);
-    mUi->table_setting->resizeColumnsToContents();
-    mUi->table_setting->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    mUi->table_setting->horizontalHeader()->setSectionResizeMode(Constant::TableSetting::COL_VALUE, QHeaderView::Stretch);
     mUi->table_setting->setStyleSheet(R"(
         QTableWidget::item:selected {
             background-color: #642C48;
@@ -473,17 +510,11 @@ void UiHandler::initUi(Ui::MainWindow *ui)
         }
     )");
 
-    const int spl_filter_log_width = mUi->spl_filter_log->width();
-    Logger::d(TAG, "spl_filter_log_width = " + QString::number(spl_filter_log_width));
-    mUi->spl_filter_log->setSizes({spl_filter_log_width / 6, spl_filter_log_width * 5 / 6});
+    const int spl_filter_width = mUi->spl_filter_1->width();
+    mUi->spl_filter_1->setSizes({spl_filter_width / 6, spl_filter_width * 5 / 6});
 
-    const int spl_filter_property_width = mUi->spl_filter_property->width();
-    Logger::d(TAG, "spl_filter_property_width = " + QString::number(spl_filter_property_width));
-    mUi->spl_filter_property->setSizes({spl_filter_property_width / 6, spl_filter_property_width * 5 / 6});
-
-    const int spl_setting_width = mUi->spl_setting->width();
-    mUi->spl_setting->setSizes({spl_setting_width / 2, spl_setting_width / 2});
-
+    const int spl_filter_2_width = mUi->spl_filter_2->width();
+    mUi->spl_filter_2->setSizes({spl_filter_2_width / 6, spl_filter_2_width  * 5 / 6});
 
     // Line Text
     mUi->file->setFixedHeight(LINE_HEIGTH);
@@ -492,12 +523,20 @@ void UiHandler::initUi(Ui::MainWindow *ui)
     mUi->msg->setFixedHeight(LINE_HEIGTH);
     mUi->level->setFixedHeight(LINE_HEIGTH);
     mUi->find->setFixedHeight(LINE_HEIGTH);
+    mUi->line->setFixedHeight(LINE_HEIGTH);
+    mUi->time->setFixedHeight(LINE_HEIGTH);
+    mUi->property->setFixedHeight(LINE_HEIGTH);
+    mUi->setting->setFixedHeight(LINE_HEIGTH);
 
     // Log
     mUi->log->setFixedHeight(LINE_HEIGTH * 2);
     mUi->log->setReadOnly(true);
+    mUi->setting_property->setFixedHeight(LINE_HEIGTH);
+    mUi->setting_property->setReadOnly(true);
 
     initHLDelegate();
+
+    mUi->tabWidget->setCurrentIndex(0);
 }
 
 // ==================== Other UI implementation ====================

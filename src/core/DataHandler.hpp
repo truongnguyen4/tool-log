@@ -27,6 +27,8 @@ public:
     QStringList mListTag;
     QStringList mListPid;
     QStringList mListLevel;
+    QStringList mListLine;
+    QStringList mListTime;
     QStringList mListProperty;
     QStringList mListSetting;
     int mFindId = 0;
@@ -34,6 +36,8 @@ public:
     int mTagId = 0;
     int mPidId = 0;
     int mLevelId = 0;
+    int mLineId = 0;
+    int mTimeId = 0;
     int mPropertyId = 0;
     int mSettingId = 0;
     static DataHandler *getInstance()
@@ -45,7 +49,8 @@ public:
         return mDataHandler;
     }
 
-    void filterLogs(const QString &tag, const QString &msg, const QString &level, const QString &pid);
+    void filterLogs(const QString &tag, const QString &msg, const QString &level, const QString &pid
+                        , const QString &line, const QString &time);
     void filterSettings(const QString nameFilter);
     void filterProperties(const QString nameFilter);
 

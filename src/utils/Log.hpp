@@ -20,7 +20,7 @@ private:
 public:
     static inline int static_id = 0;
 
-    Log() : line(++static_id) {}
+    Log() {}
     Log(QString msg) : msg(msg), line(++static_id) {}
     Log(QString date, QString time, QString pid, QString tid, QString level, QString tag, QString msg)
         : date(date), time(time), pid(pid), tid(tid), level(level), tag(tag), msg(msg), line(++static_id) {}

@@ -35,8 +35,10 @@ public:
     QList<Log> mListObjs;
     QStringList mListKeyTags;
     QStringList mListKeyLevels;
-    QStringList mListPids;
-    QStringList mListMsgs;
+    QStringList mListKeyPids;
+    QStringList mListKeyMsgs;
+    QStringList mListKeyLines;
+    QStringList mListKeyTimes;
     bool tagAndOp = false;
     bool levelAndOp = false;
     bool pidAndOp = false;

@@ -13,7 +13,7 @@ private:
 
 public:
     inline static int static_id = 0;
-    Setting() : line(++static_id) {};
+    Setting() {};
     Setting(QString group, QString name, QString value) : group(group), name(name), value(value), line(++static_id) {};
     void setGroup(const QString group)
     {

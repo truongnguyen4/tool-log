@@ -1,4 +1,4 @@
-#ifndef UTILHELPER_HPP
+ #ifndef UTILHELPER_HPP
 #define UTILHELPER_HPP
 #include <QString>
 #include <QStringList>
@@ -22,21 +22,15 @@ public:
     }
     static QStringList splitKeywords(const QString key)
     {
+        QString splitKey = Constant::Split::OR;
         if (key.contains(Constant::Split::AND))
         {
-            return UtilHelper::splitKeywordsByAnd(key);
+            splitKey = Constant::Split::AND;
+        } else if (key.contains(Constant::Split::MINOR))
+        {
+            splitKey = Constant::Split::MINOR;
         }
-        return UtilHelper::splitKeywordsByOr(key);
-    }
-
-    static QStringList splitKeywordsByOr(const QString key)
-    {
-        return key.split(Constant::Split::OR, Qt::SkipEmptyParts);
-    }
-
-    static QStringList splitKeywordsByAnd(const QString key)
-    {
-        return key.split(Constant::Split::AND, Qt::SkipEmptyParts);
+        return key.split(splitKey, Qt::SkipEmptyParts);
     }
 
     static QTableWidgetItem *createTableItem(QString value, int direct)
@@ -81,10 +75,56 @@ public:
         }
     }
 
+    template <typename T>
+    void updateHiddenByLine(T &object, const QString content, const QStringList keys)
+    {
+        if (keys.isEmpty())
+        {
+            return;
+        }
+
+        bool isHidden = true;
+        if (content.toInt() >= keys[0].toInt() && content.toInt() <= keys[1].toInt())
+        {
+            isHidden = false;
+        }
+        object.setHidden(isHidden);
+    }
+
+    template <typename T>
+    void updateHiddenByTime(T &object, const QString content, const QStringList keys)
+    {
+        if (keys.isEmpty())
+        {
+            return;
+        }
+
+        bool isHidden = true;
+        if (toMilliseconds(content) >= toMilliseconds(keys[0]) && toMilliseconds(content) <= toMilliseconds(keys[1]))
+        {
+            isHidden = false;
+        }
+        object.setHidden(isHidden);
+    }
+
+    int toMilliseconds(const QString &time)
+    {
+        int h = time.mid(0, 2).toInt();
+        int m = time.mid(3, 2).toInt();
+        int s = time.mid(6, 2).toInt();
+        int ms = time.mid(9, 3).toInt();
+        return h * 3600000 + m * 60000 + s * 1000 + ms;
+    }
+
     void updateFilter(QStringList &keys, bool &andOp, const QString key)
     {
         keys = UtilHelper::splitKeywords(key);
         andOp = key.contains(Constant::Split::AND);
+    }
+
+    void updateFilter(QStringList &keys, const QString key)
+    {
+        keys = UtilHelper::splitKeywords(key);
     }
 
     template <typename T>

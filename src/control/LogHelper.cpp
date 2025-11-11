@@ -43,15 +43,23 @@ void LogHelper::updateHiddenLog(Log &log)
     }
     if (!log.getHidden())
     {
-        mUtilHelper->updateHidden<Log>(log, log.getMsg(), mListMsgs, msgAndOp);
+        mUtilHelper->updateHidden<Log>(log, log.getMsg(), mListKeyMsgs, msgAndOp);
     }
     if (!log.getHidden())
     {
-        mUtilHelper->updateHidden<Log>(log, log.getPid(), mListPids, pidAndOp);
+        mUtilHelper->updateHidden<Log>(log, log.getPid(), mListKeyPids, pidAndOp);
     }
     if (!log.getHidden())
     {
         mUtilHelper->updateHidden<Log>(log, log.getLevel(), mListKeyLevels, levelAndOp);
+    }
+    if (!log.getHidden())
+    {
+        mUtilHelper->updateHiddenByLine<Log>(log, QString::number(log.getLine()), mListKeyLines);
+    }
+    if (!log.getHidden())
+    {
+        mUtilHelper->updateHiddenByTime<Log>(log, log.getTime(), mListKeyTimes);
     }
 }
 

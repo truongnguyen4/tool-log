@@ -12,7 +12,7 @@ private:
     bool isHidden = false;
 
 public:
-    Property() : line(++static_id) {};
+    Property() {};
     Property(QString name, QString value) : name(name), value(value), line(++static_id) {};
     inline static int static_id = 0;
     void setName(const QString name)

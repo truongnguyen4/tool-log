@@ -70,13 +70,13 @@
          <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="pg_adb">
          <attribute name="title">
           <string>adb</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_9">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
@@ -157,7 +157,7 @@
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="setting">
+               <widget class="QPushButton" name="configuration">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::NoFocus</enum>
                 </property>
@@ -173,7 +173,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QSplitter" name="spl_filter_log">
+             <widget class="QSplitter" name="spl_filter_1">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -330,6 +330,52 @@
                   </property>
                   <property name="focusPolicy">
                    <enum>Qt::FocusPolicy::StrongFocus</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="text">
+                   <string>Line</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="line">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::StrongFocus</enum>
+                  </property>
+                  <property name="placeholderText">
+                   <string notr="true">1 - 100</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_12">
+                  <property name="text">
+                   <string>Time</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="time">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::FocusPolicy::StrongFocus</enum>
+                  </property>
+                  <property name="placeholderText">
+                   <string>20:40:52.391 - 20:41:04.095</string>
                   </property>
                  </widget>
                 </item>
@@ -573,9 +619,9 @@
         </widget>
         <widget class="QWidget" name="pg_property">
          <attribute name="title">
-          <string>property</string>
+          <string>configuration</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
@@ -605,13 +651,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QSplitter" name="spl_filter_property">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+           <widget class="QSplitter" name="spl_filter_2">
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
             </property>
@@ -625,7 +665,14 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="setting_filter"/>
+               <widget class="QLineEdit" name="setting">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QLabel" name="label_7">
@@ -635,7 +682,14 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="property_filter"/>
+               <widget class="QLineEdit" name="property">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="verticalSpacer_2">
@@ -652,59 +706,68 @@
               </item>
              </layout>
             </widget>
-            <widget class="QSplitter" name="spl_setting">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <widget class="QTableWidget" name="table_setting">
-              <column>
-               <property name="text">
-                <string>Line</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Group</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Setting</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Value</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Send</string>
-               </property>
-              </column>
-             </widget>
-             <widget class="QTableWidget" name="table_property">
-              <column>
-               <property name="text">
-                <string>Line</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Property</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Value</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Send</string>
-               </property>
-              </column>
-             </widget>
+            <widget class="QWidget" name="verticalLayoutWidget_4">
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item>
+               <widget class="QTextEdit" name="setting_property"/>
+              </item>
+              <item>
+               <widget class="QSplitter" name="spl_setting_property">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <widget class="QTableWidget" name="table_setting">
+                 <column>
+                  <property name="text">
+                   <string>Line</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Group</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Setting</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Value</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Send</string>
+                  </property>
+                 </column>
+                </widget>
+                <widget class="QTableWidget" name="table_property">
+                 <column>
+                  <property name="text">
+                   <string>Line</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Property</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Value</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Send</string>
+                  </property>
+                 </column>
+                </widget>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </widget>
           </item>

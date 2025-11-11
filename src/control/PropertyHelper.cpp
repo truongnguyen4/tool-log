@@ -53,6 +53,10 @@ void PropertyHelper::filterProperties()
     {
         property.setHidden(false);
         mUtilHelper->updateHidden<Property>(property, property.getName(), mListKeys, andOp);
+        if (property.getName() == "persist.sys.dalvik.vm.lib.2")
+        {
+            Logger::d(TAG, "property = " + property.toString());
+        }
     }
 }
 

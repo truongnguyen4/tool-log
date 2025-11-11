@@ -29,6 +29,8 @@ private:
     Ui::MainWindow *ui;
     UiHandler *mUiHandler = UiHandler::getInstance();
     DataHandler *mDataHandler = DataHandler::getInstance();
+    UtilHelper *mUtilHelper = UtilHelper::getInstance();
+
     class MainWindowDeviceChangeListener : public ProcessHelper::DeviceChangeListener
     {
     public:

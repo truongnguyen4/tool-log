@@ -54,6 +54,7 @@ public:
     public:
         inline static const QString OR = "|";
         inline static const QString AND = "&";
+        inline static const QString MINOR = "-";
     };
 
     class LogLevel final

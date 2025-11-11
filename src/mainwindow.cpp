@@ -30,9 +30,11 @@ void MainWindow::init()
     connect(ui->tag, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
     connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
     connect(ui->level, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->line, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
+    connect(ui->time, &QLineEdit::returnPressed, this, &MainWindow::onFilterLog);
 
-    connect(ui->property_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterProperties);
-    connect(ui->setting_filter, &QLineEdit::returnPressed, this, &MainWindow::onFilterSettings);
+    connect(ui->property, &QLineEdit::returnPressed, this, &MainWindow::onFilterProperties);
+    connect(ui->setting, &QLineEdit::returnPressed, this, &MainWindow::onFilterSettings);
 
     connect(ui->refresh, &QPushButton::pressed, this, [this]() {
         onRefreshProperty();
@@ -44,11 +46,15 @@ void MainWindow::init()
     ui->tag->installEventFilter(this);
     ui->msg->installEventFilter(this);
     ui->level->installEventFilter(this);
+    ui->line->installEventFilter(this);
+    ui->time->installEventFilter(this);
     ui->devices->installEventFilter(this);
-    ui->property_filter->installEventFilter(this);
-    ui->setting_filter->installEventFilter(this);
+    ui->property->installEventFilter(this);
+    ui->setting->installEventFilter(this);
 
     connect(ui->table_logs, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
+    connect(ui->table_setting, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
+    connect(ui->table_property, &QTableWidget::itemClicked, this, &MainWindow::onShowItem);
     connect(ui->table_logs, &QTableWidget::itemDoubleClicked, this, &MainWindow::onMarkItem);
     connect(ui->table_logmark, &QTableWidget::itemClicked, this, &MainWindow::onFocusItem);
     connect(ui->find, &QLineEdit::returnPressed, this, &MainWindow::onFind);
@@ -56,7 +62,7 @@ void MainWindow::init()
     connect(ui->msg, &QLineEdit::returnPressed, this, &MainWindow::onSetMsgHighLight);
     connect(ui->start, &QPushButton::pressed, this, &MainWindow::onStart);
     connect(ui->clear, &QPushButton::pressed, this, &MainWindow::onClear);
-    connect(ui->setting, &QPushButton::pressed, this, &MainWindow::onSettings);
+    connect(ui->configuration, &QPushButton::pressed, this, &MainWindow::onSettings);
     connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
     connect(ui->save_log, &QPushButton::pressed, this, &MainWindow::onSaveLog);
     connect(ui->start_kernel, &QPushButton::pressed, this, &MainWindow::onStartKernel);
@@ -124,20 +130,48 @@ void MainWindow::onFilterLog()
     QString tag = ui->tag->text().trimmed();
     QString msg = ui->msg->text().trimmed();
     QString level = ui->level->text().trimmed();
-    mDataHandler->filterLogs(pid, tag, msg, level);
+
+    QString line = ui->line->text().trimmed();
+    if (!line.isEmpty())
+    {
+        static QRegularExpression regexLine("^\\s*(\\d+)\\s*-\\s*(\\d+)\\s*$");
+        QRegularExpressionMatch matchLine = regexLine.match(line);
+        if (!matchLine.hasMatch() || matchLine.captured(1).toInt() > matchLine.captured(2).toInt())
+        {
+            Logger::w(TAG, "line format is incorrect");
+            return;
+        }
+        line = matchLine.captured(1) + Constant::Split::MINOR + matchLine.captured(2);
+    }
+
+    QString time = ui->time->text().trimmed();
+    if (!time.isEmpty())
+    {
+        static QRegularExpression regexTime("^\\s*(\\d{2}:\\d{2}:\\d{2}\\.\\d{3})\\s*-\\s*(\\d{2}:\\d{2}:\\d{2}\\.\\d{3})\\s*$");
+        QRegularExpressionMatch matchTime = regexTime.match(time);
+        if (!matchTime.hasMatch()
+            || mUtilHelper->toMilliseconds(matchTime.captured(1)) > mUtilHelper->toMilliseconds(matchTime.captured(2)))
+        {
+            Logger::w(TAG, "time format is incorrect");
+            return;
+        }
+        time = matchTime.captured(1) + Constant::Split::MINOR + matchTime.captured(2);
+    }
+
+    mDataHandler->filterLogs(pid, tag, msg, level, line, time);
     mUiHandler->updateLogVisibility();
 }
 
 void MainWindow::onFilterProperties()
 {
-    QString name = ui->property_filter->text().trimmed();
+    QString name = ui->property->text().trimmed();
     mDataHandler->filterProperties(name);
     mUiHandler->updatePropertiesVisibility();
 }
 
 void MainWindow::onFilterSettings()
 {
-    QString name = ui->setting_filter->text().trimmed();
+    QString name = ui->setting->text().trimmed();
     mDataHandler->filterSettings(name);
     mUiHandler->updateSettingsVisibility();
 }
@@ -260,9 +294,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             || objName == ui->msg->objectName() 
             || objName == ui->tag->objectName() 
             || objName == ui->pid->objectName() 
-            || objName == ui->level->objectName() 
-            || objName == ui->property_filter->objectName() 
-            || objName == ui->setting_filter->objectName())
+            || objName == ui->level->objectName()
+            || objName == ui->line->objectName()
+            || objName == ui->time->objectName()
+            || objName == ui->property->objectName()
+            || objName == ui->setting->objectName())
         {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
             if (keyEvent->key() == Qt::Key_Down)
