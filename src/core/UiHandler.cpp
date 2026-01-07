@@ -411,7 +411,7 @@ void UiHandler::initUi(Ui::MainWindow *ui)
 {
     mUi = ui;
     // mUi->file->setText("C:\\Users\\ttnguyen4\\Downloads\\output.log");
-    mUi->file->setText("/home/truongnguyen/Downloads/output.log");
+    mUi->file->setText("/home/truongnguyen/Downloads/log_SkorpioX5_G24M87622_20251223_085658/logcat.log");
 
     // Table logs
     mUi->table_logs->verticalHeader()->setVisible(false);

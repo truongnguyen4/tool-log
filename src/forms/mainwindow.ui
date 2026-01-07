@@ -70,7 +70,7 @@
          <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pg_adb">
          <attribute name="title">
@@ -137,6 +137,13 @@
                 <property name="icon">
                  <iconset resource="../../resource.qrc">
                   <normaloff>:/icons/remove-bookmark.png</normaloff>:/icons/remove-bookmark.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_change_format">
+                <property name="text">
+                 <string>Format</string>
                 </property>
                </widget>
               </item>

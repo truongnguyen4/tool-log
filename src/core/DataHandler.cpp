@@ -80,6 +80,10 @@ void DataHandler::startWatchLogRealTime(const QString deviceId, const bool isWat
     mProcessHelper->startWatchLogRealTime(deviceId);
 }
 
+void DataHandler::toggleFormatLog() {
+    mLogHelper->toggleFormatLog();
+}
+
 QString DataHandler::previousKey(Ui::MainWindow *ui, QObject *obj)
 {
     auto findPrevious = [](const QStringList &keys, int &index) -> QString

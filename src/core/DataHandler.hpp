@@ -61,6 +61,7 @@ public:
     void clearLogcat(const QString deviceId);
     void startWatchLog(QString filePath, const QString deviceId);
     void startWatchLogRealTime(const QString deviceId, const bool isWatching);
+    void toggleFormatLog();
 
     QString previousKey(Ui::MainWindow *ui, QObject *obj);
     QString nextKey(Ui::MainWindow *ui, QObject *obj);

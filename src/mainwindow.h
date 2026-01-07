@@ -63,6 +63,7 @@ private:
     void onClear();
     void onSaveLog();
     void onStartKernel();
+    void onChangeFormatLog();
     
     void onFilterLog();
     void onFilterProperties();

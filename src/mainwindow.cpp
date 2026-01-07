@@ -66,6 +66,7 @@ void MainWindow::init()
     connect(ui->btn_clear_mark, &QPushButton::pressed, this, &MainWindow::onClearMark);
     connect(ui->save_log, &QPushButton::pressed, this, &MainWindow::onSaveLog);
     connect(ui->start_kernel, &QPushButton::pressed, this, &MainWindow::onStartKernel);
+    connect(ui->btn_change_format, &QPushButton::pressed, this, &MainWindow::onChangeFormatLog);
     connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::onStop);
 }
 
@@ -122,6 +123,10 @@ void MainWindow::onStartKernel()
     isWatching = !isWatching;
     Logger::d(TAG, (QString(isWatching ? "Start" : "Stop")) + " watching successfull");
     mUiHandler->startWatchingKernel(isWatching);
+}
+
+void MainWindow::onChangeFormatLog() {
+    mDataHandler->toggleFormatLog();
 }
 
 void MainWindow::onFilterLog()

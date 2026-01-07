@@ -5,9 +5,16 @@
 #include <QDateTime>
 #include "UtilHelper.hpp"
 
-Log LogHelper::convertToLog(const QString line)
+bool LogHelper::useFormat1 = true;
+
+Log LogHelper::convertToLog(const QString &line)
 {
-    QRegularExpressionMatch match = logcatPattern.match(line);
+    return convertToLogFunc(line);
+}
+
+Log LogHelper::convertToLogFormat1(const QString &line)
+{
+    QRegularExpressionMatch match = logcatPattern_1.match(line);
     if (match.hasMatch())
     {
         return Log(
@@ -20,7 +27,27 @@ Log LogHelper::convertToLog(const QString line)
             match.captured(7)  // msg
         );
     }
-    Logger::w(TAG, "No match!");
+    Logger::w(TAG, "No match for format 1!");
+    return Log(line);
+}
+
+Log LogHelper::convertToLogFormat2(const QString &line)
+{
+    QRegularExpressionMatch match = logcatPattern_2.match(line);
+    if (match.hasMatch())
+    {
+        return Log(
+            match.captured(1), // date
+            match.captured(2), // time
+            "",
+            "",
+            // match.captured(3) -> process name is ignored
+            match.captured(4), // level
+            match.captured(5), // tag
+            match.captured(6)  // msg
+        );
+    }
+    Logger::w(TAG, "No match for format 2!");
     return Log(line);
 }
 
@@ -71,4 +98,14 @@ QStringList LogHelper::getLogAsFile()
         logs.append(log.toString());
     }
     return logs;
+}
+
+void LogHelper::toggleFormatLog() {
+    useFormat1 = !useFormat1;
+    Logger::d(TAG, "useFormat1 = " + QString::number(useFormat1));
+    if (useFormat1) {
+        convertToLogFunc = [this](const QString &line) { return convertToLogFormat1(line); };
+    } else {
+        convertToLogFunc = [this](const QString &line) { return convertToLogFormat2(line); };
+    }
 }
